@@ -286,7 +286,7 @@
   // `topo`/`base` são zonas de segurança que a interface do Instagram cobre.
   const CONVITE = {
     feed45: { topo:0,   base:0,   brasaoW:300, brasaoY:150, nomePx:84, dataPx:100 },
-    story:  { topo:220, base:250, brasaoW:360, brasaoY:150, nomePx:92, dataPx:110 }   // brasaoY conta a partir de `topo`
+    story:  { topo:220, base:250, brasaoW:440, brasaoY:120, nomePx:100, dataPx:116 }  // brasaoY conta a partir de `topo`
   };
   const LOCAIS = {
     pub:  { titulo:"PUB GUARDIAN BIKERS MC", end:"R. Gen. Venâncio Flores, 590 · Duque de Caxias" },
@@ -558,7 +558,7 @@
     // nome do evento
     c.textAlign = "center";
     const nome = texto(v("cNome"), "[Nome do Evento]").toUpperCase();
-    const aj = ajustar(c, nome, anton, L.nomePx, L.nomePx*0.7, W - 192, 2);
+    const aj = ajustar(c, nome, anton, L.nomePx, L.nomePx*0.6, W - 192, 2);
     c.font = anton(aj.px); c.fillStyle = cor(v("cNome"), "#FFFFFF");
     let yt = yl + 110;
     for (const linha of aj.linhas){ c.fillText(linha, W/2, yt); yt += aj.px*1.05; }
@@ -610,8 +610,9 @@
     }
 
     // rodapé vinho
+    // o bloco vinho vai até a borda: a zona que o Instagram cobre fica preenchida, não vazia
     c.fillStyle = "#D7B56D"; c.fillRect(0, fim - 124, W, 4);
-    c.fillStyle = "#7B2226"; c.fillRect(0, fim - 120, W, 120);
+    c.fillStyle = "#7B2226"; c.fillRect(0, fim - 120, W, H - (fim - 120));
     const endereco = campos.cLocal.value === "outro" ? texto(v("cLocalOutro"), "[Endereço]") : local.end;
     const arroba = "@GUARDIANBIKERSMC_RJ";
     c.font = barlow(27, 700);
