@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GBMC — Moldura</title>
+<meta name="description" content="Aplica a moldura do Guardian Bikers MC na sua foto. A foto não sai do seu celular.">
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0C0A09">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GBMC">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --preto:#0C0A09;
+    --grafite:#1A1712;
+    --dourado:#D7B56D;
+    --creme:#F1DFC7;
+    --vinho:#7B2226;
+    --texto-2:#B8B0A2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--preto);
+    color:var(--creme);
+    font-family:"Barlow Condensed",system-ui,sans-serif;
+    font-size:18px;
+    line-height:1.35;
+    -webkit-text-size-adjust:100%;
+    min-height:100svh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 40px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  header img{width:38px;height:auto;display:block}
+  header h1{
+    font-family:Anton,Impact,sans-serif;
+    font-weight:400;
+    font-size:26px;
+    letter-spacing:.02em;
+    margin:0;
+    color:var(--creme);
+  }
+  header p{margin:2px 0 0;font-size:15px;color:var(--texto-2)}
+
+  /* Prancha: onde a foto aparece */
+  .prancha{
+    position:relative;
+    background:var(--grafite);
+    border:1px solid rgba(215,181,109,.28);
+    border-radius:2px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:320px;
+    overflow:hidden;
+  }
+  .prancha canvas{display:block;max-width:100%;height:auto}
+  .prancha.vazia{
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(215,181,109,.07), transparent 70%),
+      var(--grafite);
+  }
+  .vazio-msg{text-align:center;padding:44px 24px;color:var(--texto-2)}
+  .vazio-msg img{width:96px;height:auto;opacity:.32;margin-bottom:14px}
+  .vazio-msg p{margin:0;font-size:17px}
+
+  .aviso{
+    display:none;
+    margin-top:10px;
+    padding:9px 12px;
+    background:rgba(123,34,38,.22);
+    border-left:3px solid var(--vinho);
+    color:var(--creme);
+    font-size:16px;
+  }
+  .aviso.on{display:block}
+
+  .campo{margin-top:20px}
+  .campo label{display:block;font-size:16px;color:var(--texto-2);margin-bottom:6px}
+  .campo input{
+    width:100%;
+    background:var(--grafite);
+    border:1px solid rgba(241,223,199,.22);
+    border-radius:2px;
+    color:var(--creme);
+    font-family:inherit;
+    font-size:18px;
+    padding:11px 12px;
+  }
+  .campo input::placeholder{color:#7d766a}
+  .campo input:focus-visible,button:focus-visible,label.botao:focus-within{
+    outline:2px solid var(--dourado);
+    outline-offset:2px;
+  }
+  .contador{font-size:14px;color:#7d766a;text-align:right;margin-top:4px}
+
+  .acoes{display:grid;gap:10px;margin-top:22px}
+  .botao{
+    display:flex;align-items:center;justify-content:center;
+    min-height:52px;
+    padding:0 18px;
+    border:1px solid var(--dourado);
+    border-radius:2px;
+    background:transparent;
+    color:var(--dourado);
+    font-family:Anton,Impact,sans-serif;
+    font-size:19px;
+    letter-spacing:.03em;
+    cursor:pointer;
+    text-align:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .botao.forte{background:var(--dourado);color:var(--preto);border-color:var(--dourado)}
+  .botao[hidden]{display:none}
+  .botao:disabled{opacity:.4;cursor:default}
+  .botao input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+  .rodape{margin-top:30px;border-top:1px solid rgba(241,223,199,.14);padding-top:14px;font-size:15px;color:#7d766a}
+  .rodape strong{color:var(--texto-2);font-weight:500}
+
+  .provisorio{
+    margin-top:16px;
+    font-size:15px;
+    color:#7d766a;
+    border-left:3px solid rgba(215,181,109,.4);
+    padding-left:10px;
+  }
+
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    background:var(--dourado);color:var(--preto);
+    font-size:17px;padding:11px 18px;border-radius:2px;
+    opacity:0;pointer-events:none;transition:opacity .18s ease;
+    max-width:88vw;text-align:center;z-index:10;
+  }
+  .toast.on{opacity:1}
+  @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <img src="brasao.png" alt="" aria-hidden="true">
+    <div>
+      <h1>Guardian Bikers MC</h1>
+      <p>Sua foto com a moldura do clube</p>
+    </div>
+  </header>
+
+  <div class="prancha vazia" id="prancha">
+    <div class="vazio-msg" id="vazioMsg">
+      <img src="brasao.png" alt="">
+      <p>Escolha uma foto para começar.<br>Ela fica no seu celular.</p>
+    </div>
+    <canvas id="tela" hidden></canvas>
+  </div>
+
+  <p class="aviso" id="aviso"></p>
+
+  <div class="campo">
+    <label for="legenda">Legenda (opcional)</label>
+    <input id="legenda" type="text" maxlength="48" placeholder="Deixe vazio para sair sem texto" autocomplete="off" enterkeyhint="done">
+    <div class="contador" id="contador">0/48</div>
+  </div>
+
+  <div class="acoes">
+    <label class="botao forte" id="btnEscolher">
+      Escolher foto
+      <input id="arquivo" type="file" accept="image/*">
+    </label>
+    <button class="botao" id="btnSalvar" hidden>Salvar imagem</button>
+    <button class="botao" id="btnCompartilhar" hidden>Compartilhar</button>
+    <label class="botao" id="btnTrocar" hidden>
+      Trocar foto
+      <input id="arquivo2" type="file" accept="image/*">
+    </label>
+  </div>
+
+  <p class="provisorio">
+    Esta moldura é provisória — está aqui só para marcar posição. A arte definitiva
+    entra depois, sem mexer no resto.
+  </p>
+
+  <div class="rodape">
+    <strong>@guardianbikersmc_rj</strong><br>
+    Nada é enviado para a internet. A foto é processada no seu próprio aparelho.
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------------------------------------------------------------
+  // MOLDURAS
+  // Coordenadas em "unidades de prancha": fração da menor dimensão da
+  // foto. Assim a mesma régua vale em retrato e em paisagem, e trocar
+  // a arte definitiva é trocar os números daqui.
+  // ---------------------------------------------------------------
+  const MOLDURAS = {
+    retrato:  { nome:"Retrato",  faixa:0.30, brasao:0.26 },
+    quadrado: { nome:"Quadrado", faixa:0.26, brasao:0.24 },
+    paisagem: { nome:"Paisagem", faixa:0.34, brasao:0.30 }
+  };
+
+  // Instagram aceita de 4:5 (0.8) a 1.91:1 no feed.
+  const IG_MIN = 0.8, IG_MAX = 1.91;
+  const LADO_MAX = 2160;   // teto de saída; o Instagram reduz para 1080 mesmo
+  const MARGEM = 0.045;    // margem interna, em unidades de prancha
+
+  const $ = id => document.getElementById(id);
+  const prancha = $("prancha"), tela = $("tela"), vazioMsg = $("vazioMsg");
+  const aviso = $("aviso"), legenda = $("legenda"), contador = $("contador");
+  const btnSalvar = $("btnSalvar"), btnCompartilhar = $("btnCompartilhar");
+  const btnEscolher = $("btnEscolher"), btnTrocar = $("btnTrocar");
+  const toast = $("toast");
+  const ctx = tela.getContext("2d");
+
+  let foto = null;        // ImageBitmap
+  let brasao = null;      // HTMLImageElement
+  let fontesOk = false;
+  let pedidoDesenho = 0;
+
+  // --- utilidades -------------------------------------------------
+
+  let toastTimer;
+  function avisar(msg){
+    toast.textContent = msg;
+    toast.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("on"), 2600);
+  }
+
+  function carregarBrasao(){
+    return new Promise((ok, falha) => {
+      const img = new Image();
+      img.onload = () => ok(img);
+      img.onerror = () => falha(new Error("brasao"));
+      img.src = "brasao.png";
+    });
+  }
+
+  async function carregarFontes(){
+    if (!document.fonts) return false;
+    try{
+      await Promise.all([
+        document.fonts.load('400 100px Anton'),
+        document.fonts.load('500 100px "Barlow Condensed"'),
+        document.fonts.load('600 100px "Barlow Condensed"')
+      ]);
+      await document.fonts.ready;
+      return document.fonts.check('400 100px Anton');
+    }catch(e){ return false; }
+  }
+
+  const anton = px => `400 ${px}px Anton, Impact, "Arial Narrow", sans-serif`;
+  const barlow = (px, peso=500) => `${peso} ${px}px "Barlow Condensed", system-ui, sans-serif`;
+
+  function quebrar(texto, fonte, larguraMax, maxLinhas){
+    ctx.font = fonte;
+    const palavras = texto.split(/\s+/).filter(Boolean);
+    const linhas = [];
+    let atual = "";
+    for (const p of palavras){
+      const teste = atual ? atual + " " + p : p;
+      if (ctx.measureText(teste).width <= larguraMax || !atual){
+        atual = teste;
+      } else {
+        linhas.push(atual);
+        atual = p;
+        if (linhas.length === maxLinhas) break;
+      }
+    }
+    if (linhas.length < maxLinhas && atual) linhas.push(atual);
+    // se sobrou texto, corta a última linha com reticências
+    const usadas = linhas.join(" ").split(/\s+/).length;
+    if (usadas < palavras.length && linhas.length){
+      let ult = linhas[linhas.length - 1];
+      while (ult.length > 1 && ctx.measureText(ult + "…").width > larguraMax){
+        ult = ult.slice(0, -1);
+      }
+      linhas[linhas.length - 1] = ult.replace(/[\s,;.]+$/, "") + "…";
+    }
+    return linhas;
+  }
+
+  function escolherMoldura(w, h){
+    const r = w / h;
+    if (r < 0.95) return "retrato";
+    if (r <= 1.05) return "quadrado";
+    return "paisagem";
+  }
+
+  // --- desenho ----------------------------------------------------
+
+  function desenhar(){
+    if (!foto) return;
+
+    // dimensão de saída: proporção original, com teto no lado maior
+    let w = foto.width, h = foto.height;
+    const maior = Math.max(w, h);
+    if (maior > LADO_MAX){
+      const k = LADO_MAX / maior;
+      w = Math.round(w * k);
+      h = Math.round(h * k);
+    }
+    tela.width = w;
+    tela.height = h;
+
+    const u = Math.min(w, h);                  // unidade de prancha
+    const M = MOLDURAS[escolherMoldura(w, h)];
+    const margem = u * MARGEM;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(foto, 0, 0, w, h);
+
+    // faixa inferior: escurece para o texto e o brasão sempre lerem
+    const faixaAlt = u * M.faixa;
+    // sobe rápido e satura antes da zona de texto, para a legenda ler
+    // mesmo sobre céu claro ou areia
+    const grad = ctx.createLinearGradient(0, h - faixaAlt, 0, h);
+    grad.addColorStop(0,    "rgba(12,10,9,0)");
+    grad.addColorStop(0.30, "rgba(12,10,9,0.62)");
+    grad.addColorStop(0.60, "rgba(12,10,9,0.92)");
+    grad.addColorStop(1,    "rgba(12,10,9,0.92)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, h - faixaAlt, w, faixaAlt);
+
+    // fio dourado no topo da faixa
+    const fio = Math.max(1, Math.round(u * 0.0035));
+    ctx.fillStyle = "rgba(215,181,109,0.85)";
+    ctx.fillRect(0, h - faixaAlt, w, fio);
+
+    // brasão: sempre no canto inferior direito
+    let brasaoLarg = 0;
+    if (brasao){
+      const bh = u * M.brasao;
+      const bw = bh * (brasao.naturalWidth / brasao.naturalHeight);
+      const bx = w - margem - bw;
+      const by = h - margem - bh;
+      ctx.drawImage(brasao, bx, by, bw, bh);
+      brasaoLarg = bw + margem;
+    }
+
+    // legenda (opcional) + arroba, no canto inferior esquerdo
+    const texto = legenda.value.trim();
+    const larguraTexto = w - margem * 2 - brasaoLarg - u * 0.03;
+    let base = h - margem;
+
+    ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "left";
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = u * 0.012;
+
+    const arrobaPx = u * 0.032;
+    ctx.font = barlow(arrobaPx, 600);
+    ctx.fillStyle = "#D7B56D";
+    ctx.fillText("@guardianbikersmc_rj", margem, base);
+    base -= arrobaPx * 1.5;
+
+    if (texto && larguraTexto > u * 0.2){
+      // encolhe o corpo até a legenda caber em 2 linhas; só corta no piso
+      const alvo = texto.toUpperCase();
+      let legPx = u * 0.055;
+      const piso = u * 0.038;
+      let linhas = quebrar(alvo, anton(legPx), larguraTexto, 2);
+      while (legPx > piso && linhas.join(" ").endsWith("…")){
+        legPx *= 0.94;
+        linhas = quebrar(alvo, anton(legPx), larguraTexto, 2);
+      }
+      const fonteLeg = anton(legPx);
+      ctx.font = fonteLeg;
+      ctx.fillStyle = "#F1DFC7";
+      for (let i = linhas.length - 1; i >= 0; i--){
+        ctx.fillText(linhas[i], margem, base);
+        base -= legPx * 1.12;
+      }
+    }
+    ctx.shadowBlur = 0;
+
+    // aviso de proporção fora do que o Instagram aceita no feed
+    const r = w / h;
+    if (r < IG_MIN){
+      aviso.textContent = "Foto mais alta do que o Instagram aceita no feed — ele vai cortar em 4:5. Nos Stories sai inteira.";
+      aviso.classList.add("on");
+    } else if (r > IG_MAX){
+      aviso.textContent = "Foto mais larga do que o Instagram aceita no feed — ele vai cortar. Nos Stories sai inteira.";
+      aviso.classList.add("on");
+    } else {
+      aviso.classList.remove("on");
+    }
+  }
+
+  // redesenha no máximo uma vez por quadro
+  function agendarDesenho(){
+    cancelAnimationFrame(pedidoDesenho);
+    pedidoDesenho = requestAnimationFrame(desenhar);
+  }
+
+  // --- entrada de foto --------------------------------------------
+
+  async function receberArquivo(file){
+    if (!file) return;
+    if (!file.type.startsWith("image/")){
+      avisar("Esse arquivo não é uma imagem.");
+      return;
+    }
+    try{
+      if (foto && foto.close) foto.close();
+      try{
+        foto = await createImageBitmap(file, { imageOrientation:"from-image" });
+      }catch(e){
+        foto = await createImageBitmap(file);   // navegador antigo
+      }
+      if (!fontesOk) fontesOk = await carregarFontes();
+
+      tela.hidden = false;
+      vazioMsg.hidden = true;
+      prancha.classList.remove("vazia");
+      btnSalvar.hidden = false;
+      btnTrocar.hidden = false;
+      btnEscolher.hidden = true;
+      btnCompartilhar.hidden = !podeCompartilhar();
+      agendarDesenho();
+    }catch(e){
+      avisar("Não consegui abrir essa foto. Tente outra.");
+    }
+  }
+
+  function podeCompartilhar(){
+    return !!(navigator.canShare && navigator.share && window.File);
+  }
+
+  function nomeArquivo(){
+    const d = new Date();
+    const p = n => String(n).padStart(2, "0");
+    return `guardianbikers_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}.jpg`;
+  }
+
+  function gerarBlob(){
+    return new Promise(ok => tela.toBlob(ok, "image/jpeg", 0.92));
+  }
+
+  // --- ações -------------------------------------------------------
+
+  $("arquivo").addEventListener("change", e => receberArquivo(e.target.files[0]));
+  $("arquivo2").addEventListener("change", e => receberArquivo(e.target.files[0]));
+
+  legenda.addEventListener("input", () => {
+    contador.textContent = `${legenda.value.length}/48`;
+    agendarDesenho();
+  });
+
+  btnSalvar.addEventListener("click", async () => {
+    btnSalvar.disabled = true;
+    try{
+      const blob = await gerarBlob();
+      if (!blob) throw new Error("blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo();
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      avisar("Imagem salva.");
+    }catch(e){
+      avisar("Não consegui salvar. Segure o dedo na imagem para salvar.");
+    }finally{
+      btnSalvar.disabled = false;
+    }
+  });
+
+  btnCompartilhar.addEventListener("click", async () => {
+    btnCompartilhar.disabled = true;
+    try{
+      const blob = await gerarBlob();
+      const arquivo = new File([blob], nomeArquivo(), { type:"image/jpeg" });
+      if (navigator.canShare({ files:[arquivo] })){
+        await navigator.share({ files:[arquivo] });
+      } else {
+        avisar("Este navegador não compartilha imagem. Use Salvar.");
+      }
+    }catch(e){
+      if (e && e.name !== "AbortError") avisar("Não consegui compartilhar. Use Salvar.");
+    }finally{
+      btnCompartilhar.disabled = false;
+    }
+  });
+
+  // --- partida ------------------------------------------------------
+
+  carregarBrasao()
+    .then(img => { brasao = img; if (foto) agendarDesenho(); })
+    .catch(() => avisar("O brasão não carregou. Recarregue a página."));
+
+  carregarFontes().then(ok => { fontesOk = ok; if (foto) agendarDesenho(); });
+
+  if ("serviceWorker" in navigator){
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
