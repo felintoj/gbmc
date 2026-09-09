@@ -44,6 +44,18 @@
   header h1{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px;letter-spacing:.02em;margin:0}
   header p{margin:2px 0 0;font-size:15px;color:var(--texto-2)}
 
+  /* instalação */
+  .instalar{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--grafite);border:1px solid rgba(215,181,109,.35);border-radius:2px;font-size:15px;color:var(--texto-2)}
+  .instalar strong{display:block;color:var(--creme);font-weight:600;font-size:16px}
+  .instalar>div{flex:1}
+  .instalar #btnInstalar{background:var(--dourado);color:var(--preto);border:0;border-radius:2px;font-family:Anton,Impact,sans-serif;font-size:16px;letter-spacing:.03em;padding:10px 14px;cursor:pointer}
+  .instalar #btnInstalarFechar{background:transparent;border:0;color:var(--texto-3);font-size:22px;line-height:1;padding:4px 6px;cursor:pointer}
+  .instalar-passos{margin:-6px 0 14px;padding:10px 12px;border-left:3px solid var(--dourado);font-size:16px;color:var(--texto-2)}
+  .instalar-passos p{margin:0 0 8px}
+  .instalar-passos p:last-child{margin:0}
+  .instalar-passos b{color:var(--creme);font-weight:600}
+  .ic{display:inline-block;border:1px solid var(--texto-3);border-radius:3px;padding:0 5px;font-size:13px;color:var(--creme)}
+
   /* modo: Foto | Convite */
   .modos{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--dourado);border-radius:2px;overflow:hidden;margin-bottom:14px}
   .modos button{
@@ -150,6 +162,19 @@
       <p>Artes do clube, feitas no seu celular</p>
     </div>
   </header>
+
+  <div class="instalar" id="instalar" hidden>
+    <div>
+      <strong>Instale no celular</strong>
+      <span id="instalarTexto">Abre como aplicativo, direto da tela inicial.</span>
+    </div>
+    <button type="button" id="btnInstalar">Instalar</button>
+    <button type="button" id="btnInstalarFechar" aria-label="Fechar">×</button>
+  </div>
+  <div class="instalar-passos" id="instalarPassos" hidden>
+    <p><strong>No iPhone</strong> (abra no Safari): toque em <b>Compartilhar</b> <span class="ic">⎋</span> na barra de baixo, role e toque em <b>Adicionar à Tela de Início</b>, depois em <b>Adicionar</b>.</p>
+    <p><strong>No Android</strong>: menu <b>⋮</b> do navegador → <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b>.</p>
+  </div>
 
   <div class="modos" role="group" aria-label="Tipo de arte">
     <button type="button" id="modoFoto" aria-pressed="true">Foto com moldura</button>
@@ -278,36 +303,47 @@
   // =================================================================
   const FORMATOS = {
     original: { nome:"Original", sub:"sem corte",      w:0,    h:0    },
-    feed34:   { nome:"3:4",      sub:"feed alto",      w:1080, h:1440 },
-    feed45:   { nome:"4:5",      sub:"feed",           w:1080, h:1350 },
-    quadrado: { nome:"1:1",      sub:"quadrado",       w:1080, h:1080 },
-    paisagem: { nome:"1.91:1",   sub:"paisagem",       w:1080, h:566  },
-    story:    { nome:"9:16",     sub:"story / reels",  w:1080, h:1920 }
+    feed34:   { nome:"3:4",      sub:"feed alto",      w:1080, h:1440, moldura:"moldura-3x4.png"    },
+    feed45:   { nome:"4:5",      sub:"feed",           w:1080, h:1350, moldura:"moldura-4x5.png"    },
+    quadrado: { nome:"1:1",      sub:"quadrado",       w:1080, h:1080, moldura:"moldura-1x1.png"    },
+    paisagem: { nome:"1.91:1",   sub:"paisagem",       w:1080, h:566,  moldura:"moldura-1.91x1.png" },
+    story:    { nome:"9:16",     sub:"story / reels",  w:1080, h:1920, moldura:"moldura-9x16.png"   }
   };
   const FORMATOS_FOTO    = ["original","feed34","feed45","quadrado","paisagem","story"];
   const FORMATOS_CONVITE = ["feed45","story"];
 
-  // Moldura da FOTO — medidas em fração da menor dimensão da arte.
-  // `margemInf` maior no story deixa o rodapé fora da barra do Instagram.
-  const MOLDURA = {
-    retrato:  { brasao:0.16, margemInf:0.045 },
-    quadrado: { brasao:0.16, margemInf:0.045 },
-    paisagem: { brasao:0.20, margemInf:0.045 },
-    story:    { brasao:0.16, margemInf:0.16  }
+  // Moldura da FOTO — camada PNG por formato (arte da frente de design) + textos por coordenada.
+  // Tabela em px na grade de 1080 de largura (moldura-coordenadas.md). "original" é procedural.
+  const TEXTO_FOTO = {
+    feed34:   { x:49, largura:794, legPx:37, arrobaPx:32, base:1391 },
+    feed45:   { x:49, largura:794, legPx:37, arrobaPx:32, base:1301 },
+    quadrado: { x:49, largura:794, legPx:37, arrobaPx:32, base:1031 },
+    paisagem: { x:25, largura:914, legPx:19, arrobaPx:17, base:541  },
+    story:    { x:49, largura:794, legPx:37, arrobaPx:32, base:1747 }
   };
-  const LEGENDA_PX = 0.034, LEGENDA_PISO = 0.026, ARROBA_PX = 0.030;
-  const MARGEM = 0.045;
+  // "Original": mesma regra em fração da menor dimensão (16% brasão, 4,5% margem, 3,4% legenda, 3% @)
+  const ORIGINAL = { brasao:0.16, margem:0.045, legPx:0.034, arrobaPx:0.030, brasaoPaisagem:0.20 };
 
-  // Layout do CONVITE — grade de 1080 px de largura (spec CVA3 adaptada).
-  // `topo`/`base` são zonas de segurança que a interface do Instagram cobre.
+  // Layout do CONVITE — grade de 1080 px (convite-ajustes.md rev. 2 da frente de design).
+  // Bloco inferior ancorado em yR; zona superior escolhida por caso (título sim/não × 1/2 linhas).
   const CONVITE = {
-    feed45: { topo:0,   base:0,   brasaoW:300, brasaoY:160, nomePx:84,  dataPx:100, tituloPx:50 },
-    story:  { topo:220, base:250, brasaoW:440, brasaoY:130, nomePx:100, dataPx:116, tituloPx:58 }  // brasaoY conta a partir de `topo`
+    feed45: {
+      cab:100, tituloBase:208, nomePx:84, nomeMin:68, nomeLh:88, dataPx:100,
+      yR:982, barra:1246, vinho:1250, rodapeBase:1305,
+      casos: { "s1":{bw:440,top:150,nome:[793],data:905}, "s2":{bw:400,top:150,nome:[743,827],data:939},
+               "t1":{bw:352,top:260,nome:[793],data:905}, "t2":{bw:312,top:260,nome:[744,828],data:940} }
+    },
+    story: {
+      cab:300, tituloBase:410, nomePx:88, nomeMin:72, nomeLh:92, dataPx:108,
+      yR:1332, barra:1596, vinho:1600, rodapeBase:1660,
+      casos: { "s1":{bw:520,top:350,nome:[1096],data:1214}, "s2":{bw:460,top:350,nome:[1022,1114],data:1232},
+               "t1":{bw:416,top:480,nome:[1097],data:1215}, "t2":{bw:356,top:480,nome:[1022,1114],data:1232} }
+    }
   };
   const LOCAIS = {
-    pub:  { titulo:"PUB GUARDIAN BIKERS MC", end:"R. Gen. Venâncio Flores, 590 · Duque de Caxias" },
-    sede: { titulo:"GUARDIAN BIKERS MC",     end:"R. Gen. Venâncio Flores, 493 · Duque de Caxias" },
-    outro:{ titulo:"GUARDIAN BIKERS MC",     end:"" }
+    pub:  { titulo:"PUB GUARDIAN BIKERS MC",  end:"R. Gen. Venâncio Flores, 590 · Duque de Caxias" },
+    sede: { titulo:"SEDE GUARDIAN BIKERS MC", end:"R. Gen. Venâncio Flores, 493 · Duque de Caxias" },
+    outro:{ titulo:"GUARDIAN BIKERS MC",      end:"" }
   };
 
   const ESCALA_EXPORT = 2;   // saída em 2160 de largura; o Instagram reduz sozinho
@@ -325,6 +361,18 @@
     fontesOk:false
   };
   let brasao = null;
+  const molduras = {};                       // formato → HTMLImageElement (carrega quando é preciso)
+  function moldura(chave){
+    const F = FORMATOS[chave];
+    if (!F || !F.moldura) return null;
+    if (molduras[chave]) return molduras[chave].complete && molduras[chave].naturalWidth ? molduras[chave] : null;
+    const img = new Image();
+    img.onload = () => agendar();
+    img.onerror = () => { molduras[chave] = { complete:true, naturalWidth:0, falhou:true }; agendar(); };
+    img.src = F.moldura;
+    molduras[chave] = img;
+    return null;
+  }
 
   const $ = id => document.getElementById(id);
   const prancha=$("prancha"), tela=$("tela"), vazio=$("vazio"), vazioTexto=$("vazioTexto"), dica=$("dica");
@@ -420,6 +468,23 @@
     for (const ch of texto){ c.fillText(ch, cx, y); cx += c.measureText(ch).width + esp; }
     c.textAlign = alinhoAntigo;
   }
+  // quebra em 2 linhas no espaço mais perto do meio; nenhuma linha com menos de 30% da outra
+  function quebrarBalanceado(c, texto, fonte){
+    c.font = fonte;
+    const palavras = texto.split(/\s+/).filter(Boolean);
+    if (palavras.length < 2) return [texto];
+    const total = c.measureText(texto).width;
+    let melhor = null, dif = Infinity;
+    for (let i = 1; i < palavras.length; i++){
+      const a = palavras.slice(0,i).join(" "), b = palavras.slice(i).join(" ");
+      const la = c.measureText(a).width, lb = c.measureText(b).width;
+      if (Math.min(la,lb) < 0.3*Math.max(la,lb)) continue;
+      const d = Math.abs(la - total/2);
+      if (d < dif){ dif = d; melhor = [a,b]; }
+    }
+    if (!melhor){ const i = Math.ceil(palavras.length/2); melhor = [palavras.slice(0,i).join(" "), palavras.slice(i).join(" ")]; }
+    return melhor;
+  }
   function losango(c, x, y, lado, cor){
     c.save(); c.translate(x, y); c.rotate(Math.PI/4);
     c.fillStyle = cor; c.fillRect(-lado/2, -lado/2, lado, lado); c.restore();
@@ -467,14 +532,6 @@
     limitarDeslocamento(W, H);
     zoomEl.value = Math.round(z*100);
   }
-  function molduraDaArte(W, H){
-    if (S.formato === "story") return MOLDURA.story;
-    const r = W/H;
-    if (r < 0.95) return MOLDURA.retrato;
-    if (r <= 1.05) return MOLDURA.quadrado;
-    return MOLDURA.paisagem;
-  }
-
   // =================================================================
   // DESENHO — mesma função para prévia (k=1) e exportação (k=2)
   // =================================================================
@@ -499,110 +556,135 @@
     if (!S.foto) return;
     desenharFundoFoto(c, W, H);
 
-    const u = Math.min(W, H);
-    const M = molduraDaArte(W, H);
-    const margem = u*MARGEM, margemInf = u*M.margemInf;
-
-    // brasão: sempre no canto inferior direito, com sombra leve para ler sobre foto clara
-    let brasaoLarg = 0;
-    if (brasao){
-      const bh = u*M.brasao, bw = bh*(brasao.naturalWidth/brasao.naturalHeight);
-      c.save();
-      c.shadowColor = "rgba(0,0,0,0.45)"; c.shadowBlur = u*0.02; c.shadowOffsetY = u*0.004;
-      c.drawImage(brasao, W - margem - bw, H - margemInf - bh, bw, bh);
-      c.restore();
-      brasaoLarg = bw + margem;
-    }
-
-    // legenda e @ (opcional), canto inferior esquerdo, alinhados à base do brasão
     const texto = campos.legenda.value.trim();
     const mostrarArroba = campos.mostrarArroba.checked;
-    const larguraTexto = W - margem*2 - brasaoLarg - u*0.03;
-    let base = H - margemInf;
-    c.textBaseline = "alphabetic"; c.textAlign = "left";
-    c.shadowColor = "rgba(0,0,0,0.75)"; c.shadowBlur = u*0.014; c.shadowOffsetY = u*0.002;
+    let T;   // caixa de texto: x, largura, legPx, arrobaPx, base
 
+    if (S.formato === "original"){
+      // sem camada fixa: brasão e caixa calculados pela mesma regra da tabela
+      const u = Math.min(W, H), margem = u*ORIGINAL.margem;
+      const bh = u*(W/H > 1.5 ? ORIGINAL.brasaoPaisagem : ORIGINAL.brasao);
+      const bw = brasao ? bh*(brasao.naturalWidth/brasao.naturalHeight) : bh*0.804;
+      if (brasao){
+        c.save(); c.shadowColor = "rgba(0,0,0,0.45)"; c.shadowBlur = 14*(u/1080); c.shadowOffsetY = 6*(u/1080);
+        c.drawImage(brasao, W - margem - bw, H - margem - bh, bw, bh); c.restore();
+      }
+      T = { x:margem, largura:(W - margem - bw) - 2*margem, legPx:u*ORIGINAL.legPx, arrobaPx:u*ORIGINAL.arrobaPx, base:H - margem, u };
+    } else {
+      const img = moldura(S.formato);
+      if (img) c.drawImage(img, 0, 0, W, H);
+      else if (brasao && molduras[S.formato] && molduras[S.formato].falhou){
+        // camada não carregou: brasão procedural na posição da tabela
+        const t = TEXTO_FOTO[S.formato], bh = S.formato === "paisagem" ? 113 : 173;
+        const bw = bh*(brasao.naturalWidth/brasao.naturalHeight);
+        c.drawImage(brasao, W - t.x - bw, t.base - bh, bw, bh);
+      }
+      T = Object.assign({ u:Math.min(W,H) }, TEXTO_FOTO[S.formato]);
+    }
+
+    let base = T.base;
+    c.textBaseline = "alphabetic"; c.textAlign = "left";
     if (mostrarArroba){
-      const px = u*ARROBA_PX;
-      c.font = barlow(px, 600); c.fillStyle = "#D7B56D";
-      c.fillText("@guardianbikersmc_rj", margem, base);
-      base -= px*1.6;
+      c.save(); c.shadowColor = "rgba(0,0,0,0.55)"; c.shadowBlur = 8; c.shadowOffsetY = 2;
+      c.font = barlow(T.arrobaPx, 600); c.fillStyle = "#D7B56D";
+      c.fillText("@guardianbikersmc_rj", T.x, base);
+      c.restore();
+      base -= T.arrobaPx + T.u*0.012;
     }
-    if (texto && larguraTexto > u*0.2){
-      const { px, linhas } = ajustar(c, texto.toUpperCase(), anton, u*LEGENDA_PX, u*LEGENDA_PISO, larguraTexto, 2);
-      c.font = anton(px); c.fillStyle = "#F1DFC7";
-      for (let i = linhas.length-1; i >= 0; i--){ c.fillText(linhas[i], margem, base); base -= px*1.15; }
+    if (texto && T.largura > T.u*0.2){
+      const { px, linhas } = ajustar(c, texto.toUpperCase(), anton, T.legPx, T.legPx*0.75, T.largura, 2);
+      c.save(); c.shadowColor = "rgba(0,0,0,0.55)"; c.shadowBlur = 8; c.shadowOffsetY = 2;
+      c.font = anton(px); c.fillStyle = "#FFFFFF";
+      for (let i = linhas.length-1; i >= 0; i--){ c.fillText(linhas[i], T.x, base); base -= px*1.05; }
+      c.restore();
     }
-    c.shadowBlur = 0; c.shadowOffsetY = 0;
   }
 
   function desenharConvite(c, W, H, previa){
     const L = CONVITE[S.formato] || CONVITE.feed45;
     const local = LOCAIS[campos.cLocal.value] || LOCAIS.pub;
     const v = id => campos[id].value.trim();
-    const PH = "rgba(241,223,199,0.32)";     // cor de marcador, só na prévia
+    const PH = "rgba(241,223,199,0.32)";                 // marcador, só na prévia
     const texto = (valor, marcador) => valor || (previa ? marcador : "");
     const cor = (valor, corCheia) => valor ? corCheia : PH;
+    const temFoto = !!S.foto;
+    const filete = temFoto ? "rgba(215,181,109,0.55)" : "rgba(215,181,109,0.40)";
+    const esp = (px, em) => px*em;                       // tracking em em → px
 
-    // fundo
+    // ---- fundo ----
     c.fillStyle = "#0C0A09"; c.fillRect(0, 0, W, H);
-    if (S.foto){
-      desenharFundoFoto(c, W, H);
-      c.fillStyle = "rgba(12,10,9,0.50)"; c.fillRect(0, 0, W, H);
-      const g = c.createLinearGradient(0, H*0.45, 0, H);
-      g.addColorStop(0, "rgba(12,10,9,0)"); g.addColorStop(1, "rgba(12,10,9,0.85)");
+    if (temFoto){
+      c.save(); try{ c.filter = "saturate(0.7)"; }catch(e){}
+      desenharFundoFoto(c, W, H); c.restore();
+      c.fillStyle = "rgba(12,10,9,0.45)"; c.fillRect(0, 0, W, H);
+      let g = c.createLinearGradient(0, H*0.45, 0, H);
+      g.addColorStop(0, "rgba(12,10,9,0)"); g.addColorStop(1, "rgba(12,10,9,0.92)");
       c.fillStyle = g; c.fillRect(0, 0, W, H);
+      g = c.createLinearGradient(0, 0, 0, H*0.18);
+      g.addColorStop(0, "rgba(12,10,9,0.55)"); g.addColorStop(1, "rgba(12,10,9,0)");
+      c.fillStyle = g; c.fillRect(0, 0, W, H*0.18);
     }
-
     c.textBaseline = "alphabetic";
-    const top = L.topo, fim = H - L.base;
 
-    // cabeçalho
-    losango(c, 101, top + 96, 9, "#D7B56D");
-    c.font = barlow(34, 700); c.fillStyle = "#D7B56D";
-    textoEspacado(c, local.titulo, 124, top + 106, 6, "left");
-    c.font = barlow(30, 600); c.fillStyle = "#B8B0A2"; c.textAlign = "right";
-    c.fillText("CONVITE", W - 96, top + 106);
+    // ---- cabeçalho ----
+    losango(c, 101, L.cab - 10, 9, "#D7B56D");
+    c.font = barlow(30, 700); c.fillStyle = "#D7B56D";
+    textoEspacado(c, local.titulo, 124, L.cab, esp(30, 0.26), "left");
+    c.font = barlow(26, 600); c.fillStyle = "#8A8478";
+    textoEspacado(c, "CONVITE", W - 96, L.cab, esp(26, 0.18), "right");
 
-    // título opcional no topo; quando existe, o brasão desce e encolhe para a data não invadir o bloco
-    let brasaoTop = top + L.brasaoY, brasaoW = L.brasaoW;
+    // ---- título (kicker) ----
     const titulo = v("cTitulo");
     if (titulo){
-      c.textAlign = "center";
-      const px = caberLinha(c, titulo.toUpperCase(), anton, L.tituloPx, L.tituloPx*0.65, W - 192);
-      c.font = anton(px); c.fillStyle = "#F1DFC7";
-      c.fillText(titulo.toUpperCase(), W/2, top + 106 + L.tituloPx*1.55);
-      brasaoTop += L.tituloPx*1.7; brasaoW *= 0.8;
-    }
-    let yl = brasaoTop;
-    if (brasao){
-      const bh = brasaoW*(brasao.naturalHeight/brasao.naturalWidth);
-      c.drawImage(brasao, (W - brasaoW)/2, brasaoTop, brasaoW, bh);
-      yl = brasaoTop + bh;
+      const px = caberLinha(c, titulo.toUpperCase(), anton, 56, 44, 888);
+      c.font = anton(px); c.fillStyle = "#D7B56D";
+      textoEspacado(c, titulo.toUpperCase(), W/2, L.tituloBase, esp(px, 0.02), "center");
     }
 
-    // nome do evento
-    c.textAlign = "center";
+    // ---- nome: 1 ou 2 linhas (tenta encolher antes de quebrar) ----
     const nome = texto(v("cNome"), "[Nome do Evento]").toUpperCase();
-    const aj = ajustar(c, nome, anton, L.nomePx, L.nomePx*0.6, W - 192, 2);
-    c.font = anton(aj.px); c.fillStyle = cor(v("cNome"), "#FFFFFF");
-    let yt = yl + 110;
-    for (const linha of aj.linhas){ c.fillText(linha, W/2, yt); yt += aj.px*1.05; }
-    yt -= aj.px*1.05;
+    let nomePx = L.nomePx, linhas = [];
+    if (nome){
+      c.font = anton(nomePx);
+      if (c.measureText(nome).width <= 888) linhas = [nome];
+      else {
+        let px = nomePx;
+        while (px > L.nomeMin){ px = Math.max(L.nomeMin, px - 4); c.font = anton(px); if (c.measureText(nome).width <= 888){ linhas = [nome]; nomePx = px; break; } }
+        if (!linhas.length){
+          nomePx = L.nomePx;
+          linhas = quebrarBalanceado(c, nome, anton(nomePx));
+          // se ainda estourar, encolhe as duas linhas juntas
+          let px = nomePx;
+          while (px > L.nomeMin && Math.max(...linhas.map(l => c.measureText(l).width)) > 888){ px -= 4; c.font = anton(px); }
+          nomePx = Math.max(px, L.nomeMin);
+          c.font = anton(nomePx);
+          if (Math.max(...linhas.map(l => c.measureText(l).width)) > 888) linhas = quebrar(c, nome, anton(nomePx), 888, 2);
+        }
+      }
+    }
+    const caso = L.casos[(titulo ? "t" : "s") + (linhas.length === 2 ? "2" : "1")];
 
-    // data em contorno
+    // ---- brasão ----
+    if (brasao){
+      const bw = caso.bw, bh = bw*(brasao.naturalHeight/brasao.naturalWidth);
+      c.save(); c.shadowColor = "rgba(0,0,0,0.85)"; c.shadowBlur = 70; c.shadowOffsetY = 34;
+      c.drawImage(brasao, (W - bw)/2, caso.top, bw, bh); c.restore();
+    }
+
+    // ---- nome e data ----
+    c.textAlign = "center";
+    c.font = anton(nomePx); c.fillStyle = cor(v("cNome"), "#FFFFFF");
+    linhas.forEach((l, i) => c.fillText(l, W/2, caso.nome[Math.min(i, caso.nome.length-1)]));
     const data = texto(v("cData"), "00.00");
     if (data){
-      c.font = anton(L.dataPx); c.lineWidth = 3; c.lineJoin = "round";
+      c.font = anton(L.dataPx); c.lineWidth = temFoto ? 4 : 3; c.lineJoin = "round";
       c.strokeStyle = v("cData") ? "#D7B56D" : PH;
-      c.strokeText(`[${data}]`, W/2, yt + L.dataPx*1.3);
+      c.strokeText(`[${data}]`, W/2, caso.data);
     }
 
-    // bloco de dados, ancorado no rodapé
-    const yR = fim - 374;
-    c.fillStyle = "rgba(215,181,109,0.4)";
-    c.fillRect(96, yR, W - 192, 1); c.fillRect(96, yR + 140, W - 192, 1);
-    const colW = (W - 192)/3;
+    // ---- bloco de dados ----
+    const yR = L.yR;
+    c.fillStyle = filete; c.fillRect(96, yR, 888, 1); c.fillRect(96, yR + 134, 888, 1);
     const colunas = [
       ["DIA",     texto(v("cDia"),     "[Sábado]"), !!v("cDia")],
       ["INÍCIO",  texto(v("cHora"),    "[17h]"),    !!v("cHora")],
@@ -610,58 +692,54 @@
     ];
     c.textAlign = "left";
     colunas.forEach(([rotulo, valor, cheio], i) => {
-      let x = 96 + i*colW;
-      if (i > 0){ c.fillStyle = "rgba(215,181,109,0.25)"; c.fillRect(x, yR + 18, 1, 90); x += 28; }
-      c.font = barlow(30, 500); c.fillStyle = "#B8B0A2"; c.fillText(rotulo, x, yR + 54);
+      let x = 96 + i*296;
+      if (i > 0){ c.fillStyle = "rgba(215,181,109,0.25)"; c.fillRect(x, yR + 18, 1, 92); x += 32; }
+      c.font = barlow(28, 400); c.fillStyle = "#8A8478";
+      textoEspacado(c, rotulo, x, yR + 46, esp(28, 0.18), "left");
       if (valor){
-        const larg = colW - (i > 0 ? 28 : 0) - 16;
-        const px = caberLinha(c, valor.toUpperCase(), p => barlow(p, 700), 48, 28, larg);
+        const larg = 296 - (i > 0 ? 32 : 0) - 16;
+        const px = caberLinha(c, valor.toUpperCase(), p => barlow(p, 700), 52, 30, larg);
         c.font = barlow(px, 700); c.fillStyle = cor(cheio, "#FFFFFF");
-        c.fillText(valor.toUpperCase(), x, yR + 108);
+        textoEspacado(c, valor.toUpperCase(), x, yR + 100, esp(px, 0.04), "left");
       }
     });
 
-    // linha de destaque: oferta à esquerda, banda à direita
-    const yD = yR + 210, meio = (W - 192)/2 - 20;
-    const oferta = texto(v("cOferta"), "[Destaque]"), banda = texto(v("cBanda"), "[Atração]");
-    if (oferta){
-      const px = caberLinha(c, oferta.toUpperCase(), anton, 54, 32, meio);
-      c.font = anton(px); c.fillStyle = cor(v("cOferta"), "#F1DFC7"); c.textAlign = "left";
-      c.fillText(oferta.toUpperCase(), 96, yD);
-    }
+    // ---- oferta (esq.) e banda (dir.) — banda quebra em vez de encolher ----
+    const yD = yR + 212;
+    const oferta = texto(v("cOferta"), "[Destaque]").toUpperCase(), banda = texto(v("cBanda"), "[Atração]").toUpperCase();
+    c.font = anton(54);
+    const lo = oferta ? c.measureText(oferta).width : 0, lb = banda ? c.measureText(banda).width : 0;
+    if (oferta){ c.textAlign = "left"; c.fillStyle = cor(v("cOferta"), "#F1DFC7"); c.fillText(oferta, 96, yD); }
     if (banda){
-      const px = caberLinha(c, banda.toUpperCase(), anton, 54, 32, meio);
-      c.font = anton(px); c.fillStyle = cor(v("cBanda"), "#D7B56D"); c.textAlign = "right";
-      c.fillText(banda.toUpperCase(), W - 96, yD);
+      c.textAlign = "right"; c.fillStyle = cor(v("cBanda"), "#D7B56D");
+      if (lo + lb + 48 <= 888) c.fillText(banda, W - 96, yD);
+      else {
+        // duas linhas: corpo 46 / entrelinha 48 para a 1ª linha não cruzar o filete em yR+134
+        const largBanda = Math.max(888 - lo - 48, 300);
+        const ls = quebrar(c, banda, anton(46), largBanda, 2);
+        c.font = anton(46);
+        ls.forEach((l, i) => c.fillText(l, W - 96, yD - (ls.length - 1 - i)*48));
+      }
     }
 
-    // rodapé vinho
-    // o bloco vinho vai até a borda: a zona que o Instagram cobre fica preenchida, não vazia
-    c.fillStyle = "#D7B56D"; c.fillRect(0, fim - 124, W, 4);
-    c.fillStyle = "#7B2226"; c.fillRect(0, fim - 120, W, H - (fim - 120));
+    // ---- rodapé vinho ----
+    c.fillStyle = "#D7B56D"; c.fillRect(0, L.barra, W, 4);
+    c.fillStyle = "#7B2226"; c.fillRect(0, L.vinho, W, H - L.vinho);
     const endereco = campos.cLocal.value === "outro" ? texto(v("cLocalOutro"), "[Endereço]") : local.end;
-    const arroba = "@GUARDIANBIKERSMC_RJ";
     const corEnd = (campos.cLocal.value === "outro" && !v("cLocalOutro")) ? PH : "#F1DFC7";
-    c.font = barlow(34, 700);
-    const largArroba = c.measureText(arroba).width;
-    const disponivel = W - 192 - largArroba - 40;
-    c.font = barlow(24, 500);
-    const cabeLado = c.measureText(endereco).width <= disponivel;   // no menor corpo aceitável
-    if (cabeLado){
-      // mesma linha: endereço à esquerda, @ à direita
-      c.textAlign = "right"; c.font = barlow(34, 700); c.fillStyle = "#F1DFC7";
-      c.fillText(arroba, W - 96, fim - 46);
-      const pxEnd = caberLinha(c, endereco, p => barlow(p, 500), 34, 24, disponivel);
-      c.textAlign = "left"; c.font = barlow(pxEnd, 500); c.fillStyle = corEnd;
-      c.fillText(endereco, 96, fim - 46);
+    c.font = barlow(26, 500);
+    const duasLinhas = c.measureText(endereco).width > 540;
+    const baseArroba = duasLinhas ? L.rodapeBase - 16 : L.rodapeBase;   // @ alinhado à 1ª linha
+    c.textAlign = "right"; c.font = barlow(30, 700); c.fillStyle = "#F1DFC7";
+    c.fillText("@GUARDIANBIKERSMC_RJ", W - 96, baseArroba);
+    c.textAlign = "left"; c.fillStyle = corEnd;
+    if (!duasLinhas){
+      const px = caberLinha(c, endereco, p => barlow(p, 500), 30, 26, 540);
+      c.font = barlow(px, 500); c.fillText(endereco, 96, L.rodapeBase);
     } else {
-      // duas linhas: endereço em cima, @ embaixo
-      const pxEnd = caberLinha(c, endereco, p => barlow(p, 500), 30, 22, W - 192);
-      c.textAlign = "left"; c.font = barlow(pxEnd, 500); c.fillStyle = corEnd;
-      c.fillText(endereco, 96, fim - 72);
-      c.textAlign = "right"; c.font = barlow(30, 700); c.fillStyle = "#F1DFC7";
-      c.fillText(arroba, W - 96, fim - 30);
-      c.textAlign = "left";
+      const ls = quebrar(c, endereco, barlow(26, 500), 540, 2);
+      c.font = barlow(26, 500);
+      ls.forEach((l, i) => c.fillText(l, 96, baseArroba + i*34));
     }
   }
 
@@ -952,6 +1030,43 @@
   });
 
   // =================================================================
+  // INSTALAÇÃO (tela inicial)
+  // =================================================================
+  (function instalacao(){
+    const caixa = $("instalar"), passos = $("instalarPassos"), btn = $("btnInstalar");
+    const jaInstalado = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    const dispensado = (() => { try{ return sessionStorage.getItem("gbmc-instalar") === "nao"; }catch(e){ return false; } })();
+    if (jaInstalado || dispensado) return;
+
+    const ehIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    let pedidoInstalacao = null;
+
+    // Android/Chrome: o navegador avisa quando a instalação está disponível
+    window.addEventListener("beforeinstallprompt", e => {
+      e.preventDefault(); pedidoInstalacao = e;
+      caixa.hidden = false;
+    });
+    // iPhone não tem prompt: mostramos o caminho
+    if (ehIOS){ caixa.hidden = false; $("instalarTexto").textContent = "Pelo Safari, em dois toques."; }
+
+    btn.addEventListener("click", async () => {
+      if (pedidoInstalacao){
+        pedidoInstalacao.prompt();
+        const r = await pedidoInstalacao.userChoice.catch(() => null);
+        if (r && r.outcome === "accepted"){ caixa.hidden = true; avisar("Instalado. Abra pelo ícone GBMC."); }
+        pedidoInstalacao = null;
+      } else {
+        passos.hidden = !passos.hidden;
+      }
+    });
+    $("btnInstalarFechar").addEventListener("click", () => {
+      caixa.hidden = true; passos.hidden = true;
+      try{ sessionStorage.setItem("gbmc-instalar", "nao"); }catch(e){}
+    });
+    window.addEventListener("appinstalled", () => { caixa.hidden = true; passos.hidden = true; });
+  })();
+
+  // =================================================================
   // PARTIDA
   // =================================================================
   trocarModo("foto");
@@ -961,7 +1076,7 @@
     window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
   }
   if (typeof globalThis.__GBMC_TESTE__ === "function"){
-    globalThis.__GBMC_TESTE__({ desenhar, S, campos, dimensoesArte, centralizarFoto, aplicarZoom, setBrasao: b => { brasao = b; } });
+    globalThis.__GBMC_TESTE__({ desenhar, S, campos, dimensoesArte, centralizarFoto, aplicarZoom, molduras, setBrasao: b => { brasao = b; } });
   }
 })();
 </script>
