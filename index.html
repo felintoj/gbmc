@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GBMC — Moldura</title>
-<meta name="description" content="Aplica a moldura do Guardian Bikers MC na sua foto. A foto não sai do seu celular.">
+<title>GBMC — Artes do clube</title>
+<meta name="description" content="Moldura e convite do Guardian Bikers MC, feitos no seu celular. Nada sai do aparelho.">
 
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0C0A09">
@@ -15,131 +15,120 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --preto:#0C0A09;
-    --grafite:#1A1712;
-    --dourado:#D7B56D;
-    --creme:#F1DFC7;
-    --vinho:#7B2226;
-    --texto-2:#B8B0A2;
+    --preto:#0C0A09; --grafite:#1A1712;
+    --dourado:#D7B56D; --creme:#F1DFC7; --vinho:#7B2226;
+    --texto-2:#B8B0A2; --texto-3:#7d766a;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none !important}
   html,body{margin:0;padding:0}
   body{
-    background:var(--preto);
-    color:var(--creme);
+    background:var(--preto); color:var(--creme);
     font-family:"Barlow Condensed",system-ui,sans-serif;
-    font-size:18px;
-    line-height:1.35;
+    font-size:18px; line-height:1.35;
     -webkit-text-size-adjust:100%;
     min-height:100svh;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .wrap{max-width:520px;margin:0 auto;padding:20px 18px 40px}
+  .wrap{max-width:520px;margin:0 auto;padding:18px 16px 40px}
 
-  header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
   header img{width:38px;height:auto;display:block}
-  header h1{
-    font-family:Anton,Impact,sans-serif;
-    font-weight:400;
-    font-size:26px;
-    letter-spacing:.02em;
-    margin:0;
-    color:var(--creme);
-  }
+  header h1{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px;letter-spacing:.02em;margin:0}
   header p{margin:2px 0 0;font-size:15px;color:var(--texto-2)}
 
-  /* Prancha: onde a foto aparece */
+  /* modo: Foto | Convite */
+  .modos{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--dourado);border-radius:2px;overflow:hidden;margin-bottom:14px}
+  .modos button{
+    background:transparent;border:0;color:var(--dourado);
+    font-family:Anton,Impact,sans-serif;font-size:18px;letter-spacing:.03em;
+    padding:12px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .modos button[aria-pressed="true"]{background:var(--dourado);color:var(--preto)}
+
+  /* prancha */
   .prancha{
-    position:relative;
-    background:var(--grafite);
-    border:1px solid rgba(215,181,109,.28);
-    border-radius:2px;
+    position:relative;background:var(--grafite);
+    border:1px solid rgba(215,181,109,.28);border-radius:2px;
     display:flex;align-items:center;justify-content:center;
-    min-height:320px;
-    overflow:hidden;
+    min-height:280px;overflow:hidden;
+    touch-action:none; user-select:none; -webkit-user-select:none;
   }
-  .prancha canvas{display:block;max-width:100%;height:auto}
-  .prancha.vazia{
-    background:
-      radial-gradient(120% 80% at 50% 0%, rgba(215,181,109,.07), transparent 70%),
-      var(--grafite);
+  .prancha canvas{display:block;cursor:grab}
+  .prancha canvas.arrastando{cursor:grabbing}
+  .vazio{width:100%;text-align:center;padding:26px 0 30px;color:var(--texto-2)}
+  .vazio img{width:80%;height:auto;display:block;margin:0 auto 18px;opacity:.9}
+  .vazio p{margin:0;font-size:17px;padding:0 10%}
+  .dica{
+    position:absolute;left:0;right:0;bottom:0;
+    background:rgba(12,10,9,.78);color:var(--creme);
+    font-size:15px;text-align:center;padding:8px 10px;
+    pointer-events:none;
   }
-  .vazio-msg{text-align:center;padding:44px 24px;color:var(--texto-2)}
-  .vazio-msg img{width:96px;height:auto;opacity:.32;margin-bottom:14px}
-  .vazio-msg p{margin:0;font-size:17px}
 
   .aviso{
-    display:none;
-    margin-top:10px;
-    padding:9px 12px;
-    background:rgba(123,34,38,.22);
-    border-left:3px solid var(--vinho);
-    color:var(--creme);
-    font-size:16px;
+    margin-top:10px;padding:9px 12px;
+    background:rgba(123,34,38,.22);border-left:3px solid var(--vinho);
+    color:var(--creme);font-size:16px;
   }
-  .aviso.on{display:block}
 
-  .campo{margin-top:20px}
+  /* formatos */
+  .formatos{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+  .formatos::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;background:transparent;border:1px solid rgba(215,181,109,.45);
+    color:var(--texto-2);border-radius:2px;padding:7px 12px;
+    font-family:inherit;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    white-space:nowrap;
+  }
+  .chip[aria-pressed="true"]{background:var(--dourado);color:var(--preto);border-color:var(--dourado);font-weight:600}
+  .chip small{display:block;font-size:12px;opacity:.75;line-height:1}
+
+  .zoom{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:15px;color:var(--texto-2)}
+  .zoom input{flex:1;accent-color:var(--dourado)}
+
+  /* campos */
+  .campo{margin-top:16px}
   .campo label{display:block;font-size:16px;color:var(--texto-2);margin-bottom:6px}
-  .campo input{
-    width:100%;
-    background:var(--grafite);
-    border:1px solid rgba(241,223,199,.22);
-    border-radius:2px;
-    color:var(--creme);
-    font-family:inherit;
-    font-size:18px;
-    padding:11px 12px;
+  .campo input,.campo select{
+    width:100%;background:var(--grafite);
+    border:1px solid rgba(241,223,199,.22);border-radius:2px;
+    color:var(--creme);font-family:inherit;font-size:18px;padding:11px 12px;
+    appearance:none;-webkit-appearance:none;
   }
-  .campo input::placeholder{color:#7d766a}
-  .campo input:focus-visible,button:focus-visible,label.botao:focus-within{
-    outline:2px solid var(--dourado);
-    outline-offset:2px;
-  }
-  .contador{font-size:14px;color:#7d766a;text-align:right;margin-top:4px}
+  .campo select{background-image:linear-gradient(45deg,transparent 50%,var(--dourado) 50%),linear-gradient(135deg,var(--dourado) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;background-size:6px 6px;background-repeat:no-repeat}
+  .campo input::placeholder{color:var(--texto-3)}
+  .grade2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grade3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .contador{font-size:14px;color:var(--texto-3);text-align:right;margin-top:4px}
+  .interruptor{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:17px;color:var(--texto-2);cursor:pointer}
+  .interruptor input{width:20px;height:20px;accent-color:var(--dourado);margin:0}
+  :focus-visible,label.botao:focus-within{outline:2px solid var(--dourado);outline-offset:2px}
 
   .acoes{display:grid;gap:10px;margin-top:22px}
   .botao{
-    display:flex;align-items:center;justify-content:center;
-    min-height:52px;
-    padding:0 18px;
-    border:1px solid var(--dourado);
-    border-radius:2px;
-    background:transparent;
-    color:var(--dourado);
-    font-family:Anton,Impact,sans-serif;
-    font-size:19px;
-    letter-spacing:.03em;
-    cursor:pointer;
-    text-align:center;
-    -webkit-tap-highlight-color:transparent;
+    position:relative;display:flex;align-items:center;justify-content:center;
+    min-height:52px;padding:0 18px;
+    border:1px solid var(--dourado);border-radius:2px;background:transparent;color:var(--dourado);
+    font-family:Anton,Impact,sans-serif;font-size:19px;letter-spacing:.03em;
+    cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;
   }
-  .botao.forte{background:var(--dourado);color:var(--preto);border-color:var(--dourado)}
-  .botao[hidden]{display:none}
+  .botao.forte{background:var(--dourado);color:var(--preto)}
   .botao:disabled{opacity:.4;cursor:default}
   .botao input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 
-  .rodape{margin-top:30px;border-top:1px solid rgba(241,223,199,.14);padding-top:14px;font-size:15px;color:#7d766a}
+  .nota{margin-top:16px;font-size:15px;color:var(--texto-3);border-left:3px solid rgba(215,181,109,.4);padding-left:10px}
+  .rodape{margin-top:28px;border-top:1px solid rgba(241,223,199,.14);padding-top:14px;font-size:15px;color:var(--texto-3)}
   .rodape strong{color:var(--texto-2);font-weight:500}
-
-  .provisorio{
-    margin-top:16px;
-    font-size:15px;
-    color:#7d766a;
-    border-left:3px solid rgba(215,181,109,.4);
-    padding-left:10px;
-  }
 
   .toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
-    background:var(--dourado);color:var(--preto);
-    font-size:17px;padding:11px 18px;border-radius:2px;
-    opacity:0;pointer-events:none;transition:opacity .18s ease;
-    max-width:88vw;text-align:center;z-index:10;
+    background:var(--dourado);color:var(--preto);font-size:17px;padding:11px 18px;border-radius:2px;
+    opacity:0;pointer-events:none;transition:opacity .18s ease;max-width:88vw;text-align:center;z-index:10;
   }
   .toast.on{opacity:1}
   @media (prefers-reduced-motion:reduce){.toast{transition:none}}
@@ -152,47 +141,113 @@
     <img src="brasao.png" alt="" aria-hidden="true">
     <div>
       <h1>Guardian Bikers MC</h1>
-      <p>Sua foto com a moldura do clube</p>
+      <p>Artes do clube, feitas no seu celular</p>
     </div>
   </header>
 
-  <div class="prancha vazia" id="prancha">
-    <div class="vazio-msg" id="vazioMsg">
-      <img src="brasao.png" alt="">
-      <p>Escolha uma foto para começar.<br>Ela fica no seu celular.</p>
-    </div>
-    <canvas id="tela" hidden></canvas>
+  <div class="modos" role="group" aria-label="Tipo de arte">
+    <button type="button" id="modoFoto" aria-pressed="true">Foto com moldura</button>
+    <button type="button" id="modoConvite" aria-pressed="false">Convite de evento</button>
   </div>
 
-  <p class="aviso" id="aviso"></p>
+  <div class="prancha" id="prancha">
+    <div class="vazio" id="vazio">
+      <img src="brasao.png" alt="">
+      <p id="vazioTexto">Escolha uma foto para começar. Ela fica no seu celular.</p>
+    </div>
+    <canvas id="tela" hidden></canvas>
+    <div class="dica" id="dica" hidden>Arraste para enquadrar · pince para aproximar</div>
+  </div>
 
-  <div class="campo">
-    <label for="legenda">Legenda (opcional)</label>
-    <input id="legenda" type="text" maxlength="48" placeholder="Deixe vazio para sair sem texto" autocomplete="off" enterkeyhint="done">
-    <div class="contador" id="contador">0/48</div>
+  <div class="formatos" id="formatos" role="group" aria-label="Formato"></div>
+
+  <div class="zoom" id="zoomLinha" hidden>
+    <span>Zoom</span>
+    <input type="range" id="zoom" min="100" max="400" value="100" aria-label="Zoom da foto">
+  </div>
+
+  <p class="aviso" id="aviso" hidden></p>
+
+  <!-- campos: FOTO -->
+  <div id="camposFoto">
+    <div class="campo">
+      <label for="legenda">Legenda (opcional)</label>
+      <input id="legenda" type="text" maxlength="48" placeholder="Deixe vazio para sair sem texto" autocomplete="off" enterkeyhint="done">
+      <div class="contador" id="contador">0/48</div>
+    </div>
+    <label class="interruptor">
+      <input type="checkbox" id="mostrarArroba" checked>
+      <span>Mostrar @guardianbikersmc_rj</span>
+    </label>
+  </div>
+
+  <!-- campos: CONVITE -->
+  <div id="camposConvite" hidden>
+    <div class="campo">
+      <label for="cNome">Nome do evento</label>
+      <input id="cNome" type="text" maxlength="40" placeholder="Bike Night Guardian" autocomplete="off">
+    </div>
+    <div class="campo grade3">
+      <div>
+        <label for="cData">Data</label>
+        <input id="cData" type="text" maxlength="5" placeholder="08.08" inputmode="numeric" autocomplete="off">
+      </div>
+      <div>
+        <label for="cDia">Dia</label>
+        <input id="cDia" type="text" maxlength="12" placeholder="Sábado" autocomplete="off">
+      </div>
+      <div>
+        <label for="cHora">Início</label>
+        <input id="cHora" type="text" maxlength="8" placeholder="17h" autocomplete="off">
+      </div>
+    </div>
+    <div class="campo">
+      <label for="cLocal">Local</label>
+      <select id="cLocal">
+        <option value="pub">Pub — R. Gen. Venâncio Flores, 590</option>
+        <option value="sede">Sede — R. Gen. Venâncio Flores, 493</option>
+        <option value="outro">Outro lugar</option>
+      </select>
+    </div>
+    <div class="campo" id="cLocalOutroCampo" hidden>
+      <label for="cLocalOutro">Endereço</label>
+      <input id="cLocalOutro" type="text" maxlength="48" placeholder="Rua, número · Cidade" autocomplete="off">
+    </div>
+    <div class="campo grade2">
+      <div>
+        <label for="cEntrada">Entrada</label>
+        <input id="cEntrada" type="text" maxlength="22" placeholder="1 kg de alimento" autocomplete="off">
+      </div>
+      <div>
+        <label for="cOferta">Destaque</label>
+        <input id="cOferta" type="text" maxlength="22" placeholder="Caldos 0800" autocomplete="off">
+      </div>
+    </div>
+    <div class="campo">
+      <label for="cBanda">Atração / banda</label>
+      <input id="cBanda" type="text" maxlength="30" placeholder="Banda + horário do show" autocomplete="off">
+    </div>
   </div>
 
   <div class="acoes">
     <label class="botao forte" id="btnEscolher">
-      Escolher foto
+      <span id="btnEscolherTexto">Escolher foto</span>
       <input id="arquivo" type="file" accept="image/*">
     </label>
-    <button class="botao" id="btnSalvar" hidden>Salvar imagem</button>
-    <button class="botao" id="btnCompartilhar" hidden>Compartilhar</button>
+    <button type="button" class="botao" id="btnSalvar" hidden>Salvar imagem</button>
+    <button type="button" class="botao" id="btnCompartilhar" hidden>Compartilhar</button>
     <label class="botao" id="btnTrocar" hidden>
-      Trocar foto
+      <span id="btnTrocarTexto">Trocar foto</span>
       <input id="arquivo2" type="file" accept="image/*">
     </label>
+    <button type="button" class="botao" id="btnSemFoto" hidden>Tirar a foto de fundo</button>
   </div>
 
-  <p class="provisorio">
-    Esta moldura é provisória — está aqui só para marcar posição. A arte definitiva
-    entra depois, sem mexer no resto.
-  </p>
+  <p class="nota">A moldura da foto ainda é provisória: brasão e legenda marcam posição. A arte definitiva entra depois sem mexer no resto.</p>
 
   <div class="rodape">
     <strong>@guardianbikersmc_rj</strong><br>
-    Nada é enviado para a internet. A foto é processada no seu próprio aparelho.
+    Nada é enviado para a internet. Tudo é feito no seu próprio aparelho.
   </div>
 </div>
 
@@ -202,316 +257,650 @@
 (() => {
   "use strict";
 
-  // ---------------------------------------------------------------
-  // MOLDURAS
-  // Coordenadas em "unidades de prancha": fração da menor dimensão da
-  // foto. Assim a mesma régua vale em retrato e em paisagem, e trocar
-  // a arte definitiva é trocar os números daqui.
-  // ---------------------------------------------------------------
-  const MOLDURAS = {
-    retrato:  { nome:"Retrato",  faixa:0.30, brasao:0.26 },
-    quadrado: { nome:"Quadrado", faixa:0.26, brasao:0.24 },
-    paisagem: { nome:"Paisagem", faixa:0.34, brasao:0.30 }
+  // =================================================================
+  // FORMATOS — os que o Instagram aceita, mais "Original" (sem corte)
+  // =================================================================
+  const FORMATOS = {
+    original: { nome:"Original", sub:"sem corte",      w:0,    h:0    },
+    feed34:   { nome:"3:4",      sub:"feed alto",      w:1080, h:1440 },
+    feed45:   { nome:"4:5",      sub:"feed",           w:1080, h:1350 },
+    quadrado: { nome:"1:1",      sub:"quadrado",       w:1080, h:1080 },
+    paisagem: { nome:"1.91:1",   sub:"paisagem",       w:1080, h:566  },
+    story:    { nome:"9:16",     sub:"story / reels",  w:1080, h:1920 }
+  };
+  const FORMATOS_FOTO    = ["original","feed34","feed45","quadrado","paisagem","story"];
+  const FORMATOS_CONVITE = ["feed45","story"];
+
+  // Moldura da FOTO — medidas em fração da menor dimensão da arte.
+  // `margemInf` maior no story deixa o rodapé fora da barra do Instagram.
+  const MOLDURA = {
+    retrato:  { brasao:0.16, margemInf:0.045 },
+    quadrado: { brasao:0.16, margemInf:0.045 },
+    paisagem: { brasao:0.20, margemInf:0.045 },
+    story:    { brasao:0.16, margemInf:0.16  }
+  };
+  const LEGENDA_PX = 0.034, LEGENDA_PISO = 0.026, ARROBA_PX = 0.024;
+  const MARGEM = 0.045;
+
+  // Layout do CONVITE — grade de 1080 px de largura (spec CVA3 adaptada).
+  // `topo`/`base` são zonas de segurança que a interface do Instagram cobre.
+  const CONVITE = {
+    feed45: { topo:0,   base:0,   brasaoW:300, brasaoY:150, nomePx:84, dataPx:100 },
+    story:  { topo:220, base:250, brasaoW:360, brasaoY:150, nomePx:92, dataPx:110 }   // brasaoY conta a partir de `topo`
+  };
+  const LOCAIS = {
+    pub:  { titulo:"PUB GUARDIAN BIKERS MC", end:"R. Gen. Venâncio Flores, 590 · Duque de Caxias" },
+    sede: { titulo:"GUARDIAN BIKERS MC",     end:"R. Gen. Venâncio Flores, 493 · Duque de Caxias" },
+    outro:{ titulo:"GUARDIAN BIKERS MC",     end:"" }
   };
 
-  // Instagram aceita de 4:5 (0.8) a 1.91:1 no feed.
-  const IG_MIN = 0.8, IG_MAX = 1.91;
-  const LADO_MAX = 2160;   // teto de saída; o Instagram reduz para 1080 mesmo
-  const MARGEM = 0.045;    // margem interna, em unidades de prancha
+  const ESCALA_EXPORT = 2;   // saída em 2160 de largura; o Instagram reduz sozinho
+  const LADO_MAX_ORIGINAL = 2160;
+
+  // =================================================================
+  // ESTADO
+  // =================================================================
+  const S = {
+    modo:"foto",          // 'foto' | 'convite'
+    formato:"feed45",
+    foto:null,            // ImageBitmap
+    zoom:1,               // ≥ 1, sobre o "cover"
+    ox:0, oy:0,           // deslocamento da foto no canvas, em px da arte
+    fontesOk:false
+  };
+  let brasao = null;
 
   const $ = id => document.getElementById(id);
-  const prancha = $("prancha"), tela = $("tela"), vazioMsg = $("vazioMsg");
-  const aviso = $("aviso"), legenda = $("legenda"), contador = $("contador");
-  const btnSalvar = $("btnSalvar"), btnCompartilhar = $("btnCompartilhar");
-  const btnEscolher = $("btnEscolher"), btnTrocar = $("btnTrocar");
-  const toast = $("toast");
+  const prancha=$("prancha"), tela=$("tela"), vazio=$("vazio"), vazioTexto=$("vazioTexto"), dica=$("dica");
+  const aviso=$("aviso"), formatosEl=$("formatos"), zoomLinha=$("zoomLinha"), zoomEl=$("zoom");
+  const btnEscolher=$("btnEscolher"), btnSalvar=$("btnSalvar"), btnCompartilhar=$("btnCompartilhar");
+  const btnTrocar=$("btnTrocar"), btnSemFoto=$("btnSemFoto"), toast=$("toast");
   const ctx = tela.getContext("2d");
 
-  let foto = null;        // ImageBitmap
-  let brasao = null;      // HTMLImageElement
-  let fontesOk = false;
-  let pedidoDesenho = 0;
+  const campos = {
+    legenda:$("legenda"),
+    cNome:$("cNome"), cData:$("cData"), cDia:$("cDia"), cHora:$("cHora"),
+    cLocal:$("cLocal"), cLocalOutro:$("cLocalOutro"),
+    cEntrada:$("cEntrada"), cOferta:$("cOferta"), cBanda:$("cBanda"),
+    mostrarArroba:$("mostrarArroba")
+  };
 
-  // --- utilidades -------------------------------------------------
-
+  // =================================================================
+  // UTILIDADES
+  // =================================================================
   let toastTimer;
   function avisar(msg){
-    toast.textContent = msg;
-    toast.classList.add("on");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("on"), 2600);
+    toast.textContent = msg; toast.classList.add("on");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("on"), 2800);
   }
+  function mostrarAviso(msg){ aviso.textContent = msg; aviso.hidden = !msg; }
 
   function carregarBrasao(){
     return new Promise((ok, falha) => {
       const img = new Image();
-      img.onload = () => ok(img);
-      img.onerror = () => falha(new Error("brasao"));
+      img.onload = () => ok(img); img.onerror = () => falha(new Error("brasao"));
       img.src = "brasao.png";
     });
   }
-
   async function carregarFontes(){
     if (!document.fonts) return false;
     try{
       await Promise.all([
         document.fonts.load('400 100px Anton'),
+        document.fonts.load('400 100px "Barlow Condensed"'),
         document.fonts.load('500 100px "Barlow Condensed"'),
-        document.fonts.load('600 100px "Barlow Condensed"')
+        document.fonts.load('600 100px "Barlow Condensed"'),
+        document.fonts.load('700 100px "Barlow Condensed"')
       ]);
       await document.fonts.ready;
       return document.fonts.check('400 100px Anton');
     }catch(e){ return false; }
   }
 
-  const anton = px => `400 ${px}px Anton, Impact, "Arial Narrow", sans-serif`;
+  const anton  = px => `400 ${px}px Anton, Impact, "Arial Narrow", sans-serif`;
   const barlow = (px, peso=500) => `${peso} ${px}px "Barlow Condensed", system-ui, sans-serif`;
 
-  function quebrar(texto, fonte, larguraMax, maxLinhas){
-    ctx.font = fonte;
+  // quebra em até maxLinhas; se sobrar texto, termina com reticências
+  function quebrar(c, texto, fonte, larguraMax, maxLinhas){
+    c.font = fonte;
     const palavras = texto.split(/\s+/).filter(Boolean);
-    const linhas = [];
-    let atual = "";
+    const linhas = []; let atual = "";
     for (const p of palavras){
       const teste = atual ? atual + " " + p : p;
-      if (ctx.measureText(teste).width <= larguraMax || !atual){
-        atual = teste;
-      } else {
-        linhas.push(atual);
-        atual = p;
-        if (linhas.length === maxLinhas) break;
-      }
+      if (c.measureText(teste).width <= larguraMax || !atual) atual = teste;
+      else { linhas.push(atual); atual = p; if (linhas.length === maxLinhas) break; }
     }
     if (linhas.length < maxLinhas && atual) linhas.push(atual);
-    // se sobrou texto, corta a última linha com reticências
-    const usadas = linhas.join(" ").split(/\s+/).length;
+    const usadas = linhas.join(" ").split(/\s+/).filter(Boolean).length;
     if (usadas < palavras.length && linhas.length){
-      let ult = linhas[linhas.length - 1];
-      while (ult.length > 1 && ctx.measureText(ult + "…").width > larguraMax){
-        ult = ult.slice(0, -1);
-      }
-      linhas[linhas.length - 1] = ult.replace(/[\s,;.]+$/, "") + "…";
+      let ult = linhas[linhas.length-1];
+      while (ult.length > 1 && c.measureText(ult + "…").width > larguraMax) ult = ult.slice(0,-1);
+      linhas[linhas.length-1] = ult.replace(/[\s,;.]+$/,"") + "…";
     }
     return linhas;
   }
-
-  function escolherMoldura(w, h){
-    const r = w / h;
-    if (r < 0.95) return "retrato";
-    if (r <= 1.05) return "quadrado";
-    return "paisagem";
+  // encolhe o corpo até caber em maxLinhas (com piso); devolve {px, linhas}
+  function ajustar(c, texto, fabricaFonte, px, piso, larguraMax, maxLinhas){
+    let linhas = quebrar(c, texto, fabricaFonte(px), larguraMax, maxLinhas);
+    while (px > piso && linhas.join(" ").endsWith("…")){
+      px *= 0.94; linhas = quebrar(c, texto, fabricaFonte(px), larguraMax, maxLinhas);
+    }
+    return { px, linhas };
+  }
+  // uma linha só: encolhe até caber
+  function caberLinha(c, texto, fabricaFonte, px, piso, larguraMax){
+    c.font = fabricaFonte(px);
+    while (px > piso && c.measureText(texto).width > larguraMax){ px *= 0.94; c.font = fabricaFonte(px); }
+    return px;
+  }
+  // texto com espaçamento entre letras (funciona em qualquer navegador)
+  function textoEspacado(c, texto, x, y, esp, alinhar){
+    let larg = 0;
+    for (const ch of texto) larg += c.measureText(ch).width + esp;
+    larg -= esp;
+    let cx = alinhar === "right" ? x - larg : alinhar === "center" ? x - larg/2 : x;
+    const alinhoAntigo = c.textAlign; c.textAlign = "left";
+    for (const ch of texto){ c.fillText(ch, cx, y); cx += c.measureText(ch).width + esp; }
+    c.textAlign = alinhoAntigo;
+  }
+  function losango(c, x, y, lado, cor){
+    c.save(); c.translate(x, y); c.rotate(Math.PI/4);
+    c.fillStyle = cor; c.fillRect(-lado/2, -lado/2, lado, lado); c.restore();
   }
 
-  // --- desenho ----------------------------------------------------
-
-  function desenhar(){
-    if (!foto) return;
-
-    // dimensão de saída: proporção original, com teto no lado maior
-    let w = foto.width, h = foto.height;
+  // =================================================================
+  // GEOMETRIA DA ARTE E DA FOTO
+  // =================================================================
+  function dimensoesArte(){
+    const F = FORMATOS[S.formato];
+    if (S.formato !== "original" || !S.foto) return { w:F.w || 1080, h:F.h || 1350 };
+    let w = S.foto.width, h = S.foto.height;
     const maior = Math.max(w, h);
-    if (maior > LADO_MAX){
-      const k = LADO_MAX / maior;
-      w = Math.round(w * k);
-      h = Math.round(h * k);
+    if (maior > LADO_MAX_ORIGINAL){ const k = LADO_MAX_ORIGINAL/maior; w = Math.round(w*k); h = Math.round(h*k); }
+    return { w, h };
+  }
+  // tamanho da foto desenhada em px da arte, no zoom atual
+  function fotoDesenhada(W, H){
+    const s0 = Math.max(W/S.foto.width, H/S.foto.height);
+    const s = s0 * S.zoom;
+    return { dw: S.foto.width*s, dh: S.foto.height*s };
+  }
+  function limitarDeslocamento(W, H){
+    if (!S.foto) return;
+    const { dw, dh } = fotoDesenhada(W, H);
+    S.ox = Math.min(0, Math.max(W - dw, S.ox));
+    S.oy = Math.min(0, Math.max(H - dh, S.oy));
+  }
+  function centralizarFoto(){
+    if (!S.foto) return;
+    const { w:W, h:H } = dimensoesArte();
+    const { dw, dh } = fotoDesenhada(W, H);
+    S.ox = (W - dw)/2; S.oy = (H - dh)/2;
+  }
+  function aplicarZoom(novo, px, py){       // px,py: ponto fixo em px da arte
+    if (!S.foto) return;
+    const { w:W, h:H } = dimensoesArte();
+    const antes = fotoDesenhada(W, H);
+    const z = Math.min(4, Math.max(1, novo));
+    // ponto da foto sob (px,py) deve continuar sob (px,py)
+    const fx = (px - S.ox)/antes.dw, fy = (py - S.oy)/antes.dh;
+    S.zoom = z;
+    const depois = fotoDesenhada(W, H);
+    S.ox = px - fx*depois.dw; S.oy = py - fy*depois.dh;
+    limitarDeslocamento(W, H);
+    zoomEl.value = Math.round(z*100);
+  }
+  function molduraDaArte(W, H){
+    if (S.formato === "story") return MOLDURA.story;
+    const r = W/H;
+    if (r < 0.95) return MOLDURA.retrato;
+    if (r <= 1.05) return MOLDURA.quadrado;
+    return MOLDURA.paisagem;
+  }
+
+  // =================================================================
+  // DESENHO — mesma função para prévia (k=1) e exportação (k=2)
+  // =================================================================
+  function desenhar(c, W, H, k, previa){
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.clearRect(0, 0, W, H);
+    if (S.modo === "foto") desenharFoto(c, W, H, previa);
+    else desenharConvite(c, W, H, previa);
+    c.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  function desenharFundoFoto(c, W, H){
+    if (S.formato === "original"){
+      c.drawImage(S.foto, 0, 0, W, H);
+      return;
     }
-    tela.width = w;
-    tela.height = h;
+    const { dw, dh } = fotoDesenhada(W, H);
+    c.drawImage(S.foto, S.ox, S.oy, dw, dh);
+  }
 
-    const u = Math.min(w, h);                  // unidade de prancha
-    const M = MOLDURAS[escolherMoldura(w, h)];
-    const margem = u * MARGEM;
+  function desenharFoto(c, W, H, previa){
+    if (!S.foto) return;
+    desenharFundoFoto(c, W, H);
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(foto, 0, 0, w, h);
+    const u = Math.min(W, H);
+    const M = molduraDaArte(W, H);
+    const margem = u*MARGEM, margemInf = u*M.margemInf;
 
-    // faixa inferior: escurece para o texto e o brasão sempre lerem
-    const faixaAlt = u * M.faixa;
-    // sobe rápido e satura antes da zona de texto, para a legenda ler
-    // mesmo sobre céu claro ou areia
-    const grad = ctx.createLinearGradient(0, h - faixaAlt, 0, h);
-    grad.addColorStop(0,    "rgba(12,10,9,0)");
-    grad.addColorStop(0.30, "rgba(12,10,9,0.62)");
-    grad.addColorStop(0.60, "rgba(12,10,9,0.92)");
-    grad.addColorStop(1,    "rgba(12,10,9,0.92)");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, h - faixaAlt, w, faixaAlt);
-
-    // fio dourado no topo da faixa
-    const fio = Math.max(1, Math.round(u * 0.0035));
-    ctx.fillStyle = "rgba(215,181,109,0.85)";
-    ctx.fillRect(0, h - faixaAlt, w, fio);
-
-    // brasão: sempre no canto inferior direito
+    // brasão: sempre no canto inferior direito, com sombra leve para ler sobre foto clara
     let brasaoLarg = 0;
     if (brasao){
-      const bh = u * M.brasao;
-      const bw = bh * (brasao.naturalWidth / brasao.naturalHeight);
-      const bx = w - margem - bw;
-      const by = h - margem - bh;
-      ctx.drawImage(brasao, bx, by, bw, bh);
+      const bh = u*M.brasao, bw = bh*(brasao.naturalWidth/brasao.naturalHeight);
+      c.save();
+      c.shadowColor = "rgba(0,0,0,0.45)"; c.shadowBlur = u*0.02; c.shadowOffsetY = u*0.004;
+      c.drawImage(brasao, W - margem - bw, H - margemInf - bh, bw, bh);
+      c.restore();
       brasaoLarg = bw + margem;
     }
 
-    // legenda (opcional) + arroba, no canto inferior esquerdo
-    const texto = legenda.value.trim();
-    const larguraTexto = w - margem * 2 - brasaoLarg - u * 0.03;
-    let base = h - margem;
+    // legenda e @ (opcional), canto inferior esquerdo, alinhados à base do brasão
+    const texto = campos.legenda.value.trim();
+    const mostrarArroba = campos.mostrarArroba.checked;
+    const larguraTexto = W - margem*2 - brasaoLarg - u*0.03;
+    let base = H - margemInf;
+    c.textBaseline = "alphabetic"; c.textAlign = "left";
+    c.shadowColor = "rgba(0,0,0,0.75)"; c.shadowBlur = u*0.014; c.shadowOffsetY = u*0.002;
 
-    ctx.textBaseline = "alphabetic";
-    ctx.textAlign = "left";
-    ctx.shadowColor = "rgba(0,0,0,0.55)";
-    ctx.shadowBlur = u * 0.012;
-
-    const arrobaPx = u * 0.032;
-    ctx.font = barlow(arrobaPx, 600);
-    ctx.fillStyle = "#D7B56D";
-    ctx.fillText("@guardianbikersmc_rj", margem, base);
-    base -= arrobaPx * 1.5;
-
-    if (texto && larguraTexto > u * 0.2){
-      // encolhe o corpo até a legenda caber em 2 linhas; só corta no piso
-      const alvo = texto.toUpperCase();
-      let legPx = u * 0.055;
-      const piso = u * 0.038;
-      let linhas = quebrar(alvo, anton(legPx), larguraTexto, 2);
-      while (legPx > piso && linhas.join(" ").endsWith("…")){
-        legPx *= 0.94;
-        linhas = quebrar(alvo, anton(legPx), larguraTexto, 2);
-      }
-      const fonteLeg = anton(legPx);
-      ctx.font = fonteLeg;
-      ctx.fillStyle = "#F1DFC7";
-      for (let i = linhas.length - 1; i >= 0; i--){
-        ctx.fillText(linhas[i], margem, base);
-        base -= legPx * 1.12;
-      }
+    if (mostrarArroba){
+      const px = u*ARROBA_PX;
+      c.font = barlow(px, 600); c.fillStyle = "#D7B56D";
+      c.fillText("@guardianbikersmc_rj", margem, base);
+      base -= px*1.6;
     }
-    ctx.shadowBlur = 0;
-
-    // aviso de proporção fora do que o Instagram aceita no feed
-    const r = w / h;
-    if (r < IG_MIN){
-      aviso.textContent = "Foto mais alta do que o Instagram aceita no feed — ele vai cortar em 4:5. Nos Stories sai inteira.";
-      aviso.classList.add("on");
-    } else if (r > IG_MAX){
-      aviso.textContent = "Foto mais larga do que o Instagram aceita no feed — ele vai cortar. Nos Stories sai inteira.";
-      aviso.classList.add("on");
-    } else {
-      aviso.classList.remove("on");
+    if (texto && larguraTexto > u*0.2){
+      const { px, linhas } = ajustar(c, texto.toUpperCase(), anton, u*LEGENDA_PX, u*LEGENDA_PISO, larguraTexto, 2);
+      c.font = anton(px); c.fillStyle = "#F1DFC7";
+      for (let i = linhas.length-1; i >= 0; i--){ c.fillText(linhas[i], margem, base); base -= px*1.15; }
     }
+    c.shadowBlur = 0; c.shadowOffsetY = 0;
   }
 
-  // redesenha no máximo uma vez por quadro
-  function agendarDesenho(){
-    cancelAnimationFrame(pedidoDesenho);
-    pedidoDesenho = requestAnimationFrame(desenhar);
+  function desenharConvite(c, W, H, previa){
+    const L = CONVITE[S.formato] || CONVITE.feed45;
+    const local = LOCAIS[campos.cLocal.value] || LOCAIS.pub;
+    const v = id => campos[id].value.trim();
+    const PH = "rgba(241,223,199,0.32)";     // cor de marcador, só na prévia
+    const texto = (valor, marcador) => valor || (previa ? marcador : "");
+    const cor = (valor, corCheia) => valor ? corCheia : PH;
+
+    // fundo
+    c.fillStyle = "#0C0A09"; c.fillRect(0, 0, W, H);
+    if (S.foto){
+      desenharFundoFoto(c, W, H);
+      c.fillStyle = "rgba(12,10,9,0.50)"; c.fillRect(0, 0, W, H);
+      const g = c.createLinearGradient(0, H*0.45, 0, H);
+      g.addColorStop(0, "rgba(12,10,9,0)"); g.addColorStop(1, "rgba(12,10,9,0.85)");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+    }
+
+    c.textBaseline = "alphabetic";
+    const top = L.topo, fim = H - L.base;
+
+    // cabeçalho
+    losango(c, 101, top + 96, 9, "#D7B56D");
+    c.font = barlow(28, 700); c.fillStyle = "#D7B56D";
+    textoEspacado(c, local.titulo, 124, top + 106, 7, "left");
+    c.font = barlow(24, 600); c.fillStyle = "#B8B0A2"; c.textAlign = "right";
+    c.fillText("CONVITE", W - 96, top + 106);
+
+    // brasão centralizado
+    let yl = top + L.brasaoY;
+    if (brasao){
+      const bw = L.brasaoW, bh = bw*(brasao.naturalHeight/brasao.naturalWidth);
+      c.drawImage(brasao, (W - bw)/2, top + L.brasaoY, bw, bh);
+      yl = top + L.brasaoY + bh;
+    }
+
+    // nome do evento
+    c.textAlign = "center";
+    const nome = texto(v("cNome"), "[Nome do Evento]").toUpperCase();
+    const aj = ajustar(c, nome, anton, L.nomePx, L.nomePx*0.7, W - 192, 2);
+    c.font = anton(aj.px); c.fillStyle = cor(v("cNome"), "#FFFFFF");
+    let yt = yl + 110;
+    for (const linha of aj.linhas){ c.fillText(linha, W/2, yt); yt += aj.px*1.05; }
+    yt -= aj.px*1.05;
+
+    // data em contorno
+    const data = texto(v("cData"), "00.00");
+    if (data){
+      c.font = anton(L.dataPx); c.lineWidth = 3; c.lineJoin = "round";
+      c.strokeStyle = v("cData") ? "#D7B56D" : PH;
+      c.strokeText(`[${data}]`, W/2, yt + L.dataPx*1.3);
+    }
+
+    // bloco de dados, ancorado no rodapé
+    const yR = fim - 374;
+    c.fillStyle = "rgba(215,181,109,0.4)";
+    c.fillRect(96, yR, W - 192, 1); c.fillRect(96, yR + 140, W - 192, 1);
+    const colW = (W - 192)/3;
+    const colunas = [
+      ["DIA",     texto(v("cDia"),     "[Sábado]"), !!v("cDia")],
+      ["INÍCIO",  texto(v("cHora"),    "[17h]"),    !!v("cHora")],
+      ["ENTRADA", texto(v("cEntrada"), "[1 kg]"),   !!v("cEntrada")]
+    ];
+    c.textAlign = "left";
+    colunas.forEach(([rotulo, valor, cheio], i) => {
+      let x = 96 + i*colW;
+      if (i > 0){ c.fillStyle = "rgba(215,181,109,0.25)"; c.fillRect(x, yR + 18, 1, 90); x += 28; }
+      c.font = barlow(22, 400); c.fillStyle = "#B8B0A2"; c.fillText(rotulo, x, yR + 52);
+      if (valor){
+        const larg = colW - (i > 0 ? 28 : 0) - 16;
+        const px = caberLinha(c, valor.toUpperCase(), p => barlow(p, 700), 40, 24, larg);
+        c.font = barlow(px, 700); c.fillStyle = cor(cheio, "#FFFFFF");
+        c.fillText(valor.toUpperCase(), x, yR + 105);
+      }
+    });
+
+    // linha de destaque: oferta à esquerda, banda à direita
+    const yD = yR + 210, meio = (W - 192)/2 - 20;
+    const oferta = texto(v("cOferta"), "[Destaque]"), banda = texto(v("cBanda"), "[Atração]");
+    if (oferta){
+      const px = caberLinha(c, oferta.toUpperCase(), anton, 48, 30, meio);
+      c.font = anton(px); c.fillStyle = cor(v("cOferta"), "#F1DFC7"); c.textAlign = "left";
+      c.fillText(oferta.toUpperCase(), 96, yD);
+    }
+    if (banda){
+      const px = caberLinha(c, banda.toUpperCase(), anton, 48, 30, meio);
+      c.font = anton(px); c.fillStyle = cor(v("cBanda"), "#D7B56D"); c.textAlign = "right";
+      c.fillText(banda.toUpperCase(), W - 96, yD);
+    }
+
+    // rodapé vinho
+    c.fillStyle = "#D7B56D"; c.fillRect(0, fim - 124, W, 4);
+    c.fillStyle = "#7B2226"; c.fillRect(0, fim - 120, W, 120);
+    const endereco = campos.cLocal.value === "outro" ? texto(v("cLocalOutro"), "[Endereço]") : local.end;
+    const arroba = "@GUARDIANBIKERSMC_RJ";
+    c.font = barlow(27, 700);
+    const reserva = c.measureText(arroba).width + 40;      // medido, não chutado
+    c.textAlign = "right"; c.fillStyle = "#F1DFC7";
+    c.fillText(arroba, W - 96, fim - 50);
+    c.textAlign = "left";
+    c.fillStyle = (campos.cLocal.value === "outro" && !v("cLocalOutro")) ? PH : "#F1DFC7";
+    const pxEnd = caberLinha(c, endereco, p => barlow(p, 500), 27, 20, W - 192 - reserva);
+    c.font = barlow(pxEnd, 500); c.fillText(endereco, 96, fim - 50);
   }
 
-  // --- entrada de foto --------------------------------------------
+  // =================================================================
+  // PRÉVIA
+  // =================================================================
+  let pedido = 0;
+  function agendar(){ cancelAnimationFrame(pedido); pedido = requestAnimationFrame(redesenhar); }
 
-  async function receberArquivo(file){
-    if (!file) return;
-    if (!file.type.startsWith("image/")){
-      avisar("Esse arquivo não é uma imagem.");
+  function redesenhar(){
+    const temArte = S.modo === "convite" || !!S.foto;
+    tela.hidden = !temArte; vazio.hidden = temArte;
+    if (!temArte) return;
+    const { w:W, h:H } = dimensoesArte();
+    if (tela.width !== W || tela.height !== H){ tela.width = W; tela.height = H; }
+    ajustarTamanhoPrevia(W, H);
+    desenhar(ctx, W, H, 1, true);
+  }
+
+  function ajustarTamanhoPrevia(W, H){
+    const larg = prancha.clientWidth - 2;
+    const altMax = Math.max(260, Math.round(window.innerHeight*0.62));
+    const k = Math.min(larg/W, altMax/H);
+    tela.style.width = Math.round(W*k) + "px";
+    tela.style.height = Math.round(H*k) + "px";
+  }
+  window.addEventListener("resize", () => { if (!tela.hidden) agendar(); });
+
+  // =================================================================
+  // ARRASTAR E PINÇAR
+  // =================================================================
+  const ponteiros = new Map();
+  let pinca = null;
+
+  function pontoArte(e){
+    const r = tela.getBoundingClientRect();
+    return { x:(e.clientX - r.left)*(tela.width/r.width), y:(e.clientY - r.top)*(tela.height/r.height) };
+  }
+  function podeEnquadrar(){ return !!S.foto && S.formato !== "original"; }
+
+  tela.addEventListener("pointerdown", e => {
+    if (!podeEnquadrar()) return;
+    tela.setPointerCapture(e.pointerId);
+    ponteiros.set(e.pointerId, pontoArte(e));
+    tela.classList.add("arrastando"); dica.hidden = true;
+    if (ponteiros.size === 2){
+      const [a, b] = [...ponteiros.values()];
+      pinca = { dist:Math.hypot(a.x-b.x, a.y-b.y), zoom:S.zoom };
+    }
+  });
+  tela.addEventListener("pointermove", e => {
+    if (!ponteiros.has(e.pointerId)) return;
+    const atual = pontoArte(e), antes = ponteiros.get(e.pointerId);
+    ponteiros.set(e.pointerId, atual);
+    const { w:W, h:H } = dimensoesArte();
+    if (ponteiros.size === 2 && pinca){
+      const [a, b] = [...ponteiros.values()];
+      const dist = Math.hypot(a.x-b.x, a.y-b.y);
+      aplicarZoom(pinca.zoom*(dist/pinca.dist), (a.x+b.x)/2, (a.y+b.y)/2);
+    } else if (ponteiros.size === 1){
+      S.ox += atual.x - antes.x; S.oy += atual.y - antes.y;
+      limitarDeslocamento(W, H);
+    }
+    agendar();
+  });
+  function soltar(e){
+    ponteiros.delete(e.pointerId);
+    if (ponteiros.size < 2) pinca = null;
+    if (!ponteiros.size) tela.classList.remove("arrastando");
+  }
+  tela.addEventListener("pointerup", soltar);
+  tela.addEventListener("pointercancel", soltar);
+  tela.addEventListener("wheel", e => {
+    if (!podeEnquadrar()) return;
+    e.preventDefault();
+    const p = pontoArte(e);
+    aplicarZoom(S.zoom*(e.deltaY < 0 ? 1.08 : 1/1.08), p.x, p.y);
+    agendar();
+  }, { passive:false });
+  zoomEl.addEventListener("input", () => {
+    const { w:W, h:H } = dimensoesArte();
+    aplicarZoom(zoomEl.value/100, W/2, H/2); agendar();
+  });
+
+  // =================================================================
+  // FORMATOS (chips) E AVISO DE CORTE
+  // =================================================================
+  function montarChips(){
+    const lista = S.modo === "foto" ? FORMATOS_FOTO : FORMATOS_CONVITE;
+    formatosEl.innerHTML = "";
+    for (const chave of lista){
+      const F = FORMATOS[chave];
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.dataset.formato = chave;
+      b.setAttribute("aria-pressed", String(chave === S.formato));
+      b.innerHTML = `${F.nome}<small>${F.sub}</small>`;
+      b.addEventListener("click", () => escolherFormato(chave, true));
+      formatosEl.appendChild(b);
+    }
+  }
+  function escolherFormato(chave, manual){
+    S.formato = chave; S.zoom = 1;
+    centralizarFoto(); zoomEl.value = 100;
+    for (const b of formatosEl.children) b.setAttribute("aria-pressed", String(b.dataset.formato === chave));
+    zoomLinha.hidden = !podeEnquadrar();
+    dica.hidden = !podeEnquadrar();
+    atualizarAviso(manual);
+    agendar();
+  }
+  function formatoMaisProximo(w, h){
+    const r = w/h; let melhor = null, dif = Infinity;
+    for (const chave of FORMATOS_FOTO){
+      if (chave === "original") continue;
+      const F = FORMATOS[chave], d = Math.abs(Math.log(r) - Math.log(F.w/F.h));
+      if (d < dif){ dif = d; melhor = chave; }
+    }
+    return { chave:melhor, exato: dif < 0.02 };
+  }
+  function proporcaoLegivel(w, h){
+    const r = w/h;
+    const nomes = [[9/16,"9:16"],[3/4,"3:4"],[4/5,"4:5"],[1,"1:1"],[4/3,"4:3"],[16/9,"16:9"],[1.91,"1.91:1"]];
+    let m = nomes[0];
+    for (const n of nomes) if (Math.abs(Math.log(r)-Math.log(n[0])) < Math.abs(Math.log(r)-Math.log(m[0]))) m = n;
+    return Math.abs(Math.log(r)-Math.log(m[0])) < 0.03 ? m[1] : `${w}×${h}`;
+  }
+  function atualizarAviso(manual){
+    if (!S.foto){ mostrarAviso(""); return; }
+    if (S.modo === "convite"){ mostrarAviso(""); return; }
+    const F = FORMATOS[S.formato];
+    if (S.formato === "original"){
+      const r = S.foto.width/S.foto.height;
+      if (r < 0.75 || r > 1.91) mostrarAviso(`Sua foto é ${proporcaoLegivel(S.foto.width, S.foto.height)}. No feed o Instagram vai cortar; nos Stories sai inteira.`);
+      else mostrarAviso("");
       return;
     }
-    try{
-      if (foto && foto.close) foto.close();
-      try{
-        foto = await createImageBitmap(file, { imageOrientation:"from-image" });
-      }catch(e){
-        foto = await createImageBitmap(file);   // navegador antigo
-      }
-      if (!fontesOk) fontesOk = await carregarFontes();
+    const { exato } = formatoMaisProximo(S.foto.width, S.foto.height);
+    const mesma = Math.abs(Math.log(S.foto.width/S.foto.height) - Math.log(F.w/F.h)) < 0.02;
+    if (mesma) mostrarAviso("");
+    else mostrarAviso(`Sua foto é ${proporcaoLegivel(S.foto.width, S.foto.height)} e o formato ${F.nome} vai cortar uma parte. Arraste a foto para enquadrar, ou escolha "Original" para sair sem corte.`);
+  }
 
-      tela.hidden = false;
-      vazioMsg.hidden = true;
-      prancha.classList.remove("vazia");
-      btnSalvar.hidden = false;
-      btnTrocar.hidden = false;
-      btnEscolher.hidden = true;
-      btnCompartilhar.hidden = !podeCompartilhar();
-      agendarDesenho();
+  // =================================================================
+  // MODO
+  // =================================================================
+  function trocarModo(modo){
+    S.modo = modo;
+    $("modoFoto").setAttribute("aria-pressed", String(modo === "foto"));
+    $("modoConvite").setAttribute("aria-pressed", String(modo === "convite"));
+    $("camposFoto").hidden = modo !== "foto";
+    $("camposConvite").hidden = modo !== "convite";
+    if (modo === "convite" && !FORMATOS_CONVITE.includes(S.formato)) S.formato = "feed45";
+    if (modo === "foto" && !FORMATOS_FOTO.includes(S.formato)) S.formato = "feed45";
+    vazioTexto.textContent = "Escolha uma foto para começar. Ela fica no seu celular.";
+    montarChips();
+    escolherFormato(S.formato, false);
+    atualizarBotoes();
+  }
+  function atualizarBotoes(){
+    const temFoto = !!S.foto, convite = S.modo === "convite";
+    $("btnEscolherTexto").textContent = convite ? "Escolher foto de fundo (opcional)" : "Escolher foto";
+    $("btnTrocarTexto").textContent = convite ? "Trocar foto de fundo" : "Trocar foto";
+    btnEscolher.hidden = temFoto;
+    btnTrocar.hidden = !temFoto;
+    btnSemFoto.hidden = !(convite && temFoto);
+    const podeSair = convite || temFoto;
+    btnSalvar.hidden = !podeSair;
+    btnCompartilhar.hidden = !podeSair || !podeCompartilhar();
+    zoomLinha.hidden = !podeEnquadrar();
+  }
+  $("modoFoto").addEventListener("click", () => trocarModo("foto"));
+  $("modoConvite").addEventListener("click", () => trocarModo("convite"));
+
+  // =================================================================
+  // FOTO
+  // =================================================================
+  async function receberArquivo(file){
+    if (!file) return;
+    if (!file.type.startsWith("image/")){ avisar("Esse arquivo não é uma imagem."); return; }
+    try{
+      if (S.foto && S.foto.close) S.foto.close();
+      // limita o tamanho decodificado: economiza memória e o Instagram reduz mesmo
+      const opts = { imageOrientation:"from-image" };
+      try{ S.foto = await createImageBitmap(file, opts); }
+      catch(e){ S.foto = await createImageBitmap(file); }
+      if (Math.max(S.foto.width, S.foto.height) > 3000){
+        try{
+          const k = 3000/Math.max(S.foto.width, S.foto.height);
+          const menor = await createImageBitmap(S.foto, { resizeWidth:Math.round(S.foto.width*k), resizeHeight:Math.round(S.foto.height*k), resizeQuality:"high" });
+          S.foto.close(); S.foto = menor;
+        }catch(e){ /* navegador sem redimensionamento: segue com a original */ }
+      }
+      if (!S.fontesOk) S.fontesOk = await carregarFontes();
+
+      if (S.modo === "foto"){
+        const { chave } = formatoMaisProximo(S.foto.width, S.foto.height);
+        S.formato = chave;
+        for (const b of formatosEl.children) b.setAttribute("aria-pressed", String(b.dataset.formato === chave));
+      }
+      escolherFormato(S.formato, false);
+      atualizarBotoes();
     }catch(e){
       avisar("Não consegui abrir essa foto. Tente outra.");
     }
   }
-
-  function podeCompartilhar(){
-    return !!(navigator.canShare && navigator.share && window.File);
-  }
-
-  function nomeArquivo(){
-    const d = new Date();
-    const p = n => String(n).padStart(2, "0");
-    return `guardianbikers_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}.jpg`;
-  }
-
-  function gerarBlob(){
-    return new Promise(ok => tela.toBlob(ok, "image/jpeg", 0.92));
-  }
-
-  // --- ações -------------------------------------------------------
-
-  $("arquivo").addEventListener("change", e => receberArquivo(e.target.files[0]));
-  $("arquivo2").addEventListener("change", e => receberArquivo(e.target.files[0]));
-
-  legenda.addEventListener("input", () => {
-    contador.textContent = `${legenda.value.length}/48`;
-    agendarDesenho();
+  $("arquivo").addEventListener("change", e => { receberArquivo(e.target.files[0]); e.target.value = ""; });
+  $("arquivo2").addEventListener("change", e => { receberArquivo(e.target.files[0]); e.target.value = ""; });
+  btnSemFoto.addEventListener("click", () => {
+    if (S.foto && S.foto.close) S.foto.close();
+    S.foto = null; atualizarBotoes(); atualizarAviso(); agendar();
   });
 
+  // =================================================================
+  // CAMPOS
+  // =================================================================
+  campos.mostrarArroba.addEventListener("change", agendar);
+  campos.legenda.addEventListener("input", () => {
+    $("contador").textContent = `${campos.legenda.value.length}/48`; agendar();
+  });
+  for (const id of ["cNome","cData","cDia","cHora","cLocalOutro","cEntrada","cOferta","cBanda"]){
+    campos[id].addEventListener("input", agendar);
+  }
+  campos.cLocal.addEventListener("change", () => {
+    $("cLocalOutroCampo").hidden = campos.cLocal.value !== "outro"; agendar();
+  });
+  // data: aceita só dígitos e coloca o ponto
+  campos.cData.addEventListener("input", () => {
+    const d = campos.cData.value.replace(/\D/g, "").slice(0, 4);
+    campos.cData.value = d.length > 2 ? d.slice(0,2) + "." + d.slice(2) : d;
+  });
+
+  // =================================================================
+  // SALVAR E COMPARTILHAR
+  // =================================================================
+  function podeCompartilhar(){ return !!(navigator.canShare && navigator.share && window.File); }
+  function nomeArquivo(){
+    const d = new Date(), p = n => String(n).padStart(2,"0");
+    return `guardianbikers_${S.modo}_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}.jpg`;
+  }
+  async function gerarBlob(){
+    const { w:W, h:H } = dimensoesArte();
+    const k = S.formato === "original" ? 1 : ESCALA_EXPORT;
+    const off = document.createElement("canvas");
+    off.width = W*k; off.height = H*k;
+    desenhar(off.getContext("2d"), W, H, k, false);
+    return new Promise(ok => off.toBlob(ok, "image/jpeg", 0.92));
+  }
   btnSalvar.addEventListener("click", async () => {
     btnSalvar.disabled = true;
     try{
-      const blob = await gerarBlob();
-      if (!blob) throw new Error("blob");
+      const blob = await gerarBlob(); if (!blob) throw new Error("blob");
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = nomeArquivo();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const a = document.createElement("a"); a.href = url; a.download = nomeArquivo();
+      document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       avisar("Imagem salva.");
-    }catch(e){
-      avisar("Não consegui salvar. Segure o dedo na imagem para salvar.");
-    }finally{
-      btnSalvar.disabled = false;
-    }
+    }catch(e){ avisar("Não consegui salvar. Segure o dedo na imagem para salvar."); }
+    finally{ btnSalvar.disabled = false; }
   });
-
   btnCompartilhar.addEventListener("click", async () => {
     btnCompartilhar.disabled = true;
     try{
       const blob = await gerarBlob();
       const arquivo = new File([blob], nomeArquivo(), { type:"image/jpeg" });
-      if (navigator.canShare({ files:[arquivo] })){
-        await navigator.share({ files:[arquivo] });
-      } else {
-        avisar("Este navegador não compartilha imagem. Use Salvar.");
-      }
-    }catch(e){
-      if (e && e.name !== "AbortError") avisar("Não consegui compartilhar. Use Salvar.");
-    }finally{
-      btnCompartilhar.disabled = false;
-    }
+      if (navigator.canShare({ files:[arquivo] })) await navigator.share({ files:[arquivo] });
+      else avisar("Este navegador não compartilha imagem. Use Salvar.");
+    }catch(e){ if (e && e.name !== "AbortError") avisar("Não consegui compartilhar. Use Salvar."); }
+    finally{ btnCompartilhar.disabled = false; }
   });
 
-  // --- partida ------------------------------------------------------
-
-  carregarBrasao()
-    .then(img => { brasao = img; if (foto) agendarDesenho(); })
-    .catch(() => avisar("O brasão não carregou. Recarregue a página."));
-
-  carregarFontes().then(ok => { fontesOk = ok; if (foto) agendarDesenho(); });
-
+  // =================================================================
+  // PARTIDA
+  // =================================================================
+  trocarModo("foto");
+  carregarBrasao().then(img => { brasao = img; agendar(); }).catch(() => avisar("O brasão não carregou. Recarregue a página."));
+  carregarFontes().then(ok => { S.fontesOk = ok; agendar(); });
   if ("serviceWorker" in navigator){
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
-    });
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+  if (typeof globalThis.__GBMC_TESTE__ === "function"){
+    globalThis.__GBMC_TESTE__({ desenhar, S, campos, dimensoesArte, centralizarFoto, aplicarZoom, setBrasao: b => { brasao = b; } });
   }
 })();
 </script>
