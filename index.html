@@ -6,6 +6,9 @@
 <title>GBMC — Artes do clube</title>
 <meta name="description" content="Moldura e convite do Guardian Bikers MC, feitos no seu celular. Nada sai do aparelho.">
 
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0C0A09">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -125,6 +128,9 @@
   .rodape{margin-top:28px;border-top:1px solid rgba(241,223,199,.14);padding-top:14px;font-size:15px;color:var(--texto-3)}
   .rodape strong{color:var(--texto-2);font-weight:500}
 
+  .preview{position:fixed;inset:0;background:#000;z-index:20;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+  .preview img{max-width:100vw;max-height:100vh;width:auto;height:auto;display:block;object-fit:contain}
+  .preview-dica{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:var(--texto-2);font-size:16px;pointer-events:none}
   .toast{
     position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
     background:var(--dourado);color:var(--preto);font-size:17px;padding:11px 18px;border-radius:2px;
@@ -184,6 +190,10 @@
   <!-- campos: CONVITE -->
   <div id="camposConvite" hidden>
     <div class="campo">
+      <label for="cTitulo">Título no topo (opcional)</label>
+      <input id="cTitulo" type="text" maxlength="36" placeholder="Você é nosso convidado" autocomplete="off">
+    </div>
+    <div class="campo">
       <label for="cNome">Nome do evento</label>
       <input id="cNome" type="text" maxlength="40" placeholder="Bike Night Guardian" autocomplete="off">
     </div>
@@ -234,6 +244,7 @@
       <span id="btnEscolherTexto">Escolher foto</span>
       <input id="arquivo" type="file" accept="image/*">
     </label>
+    <button type="button" class="botao" id="btnPreview" hidden>Ver em tela cheia</button>
     <button type="button" class="botao" id="btnSalvar" hidden>Salvar imagem</button>
     <button type="button" class="botao" id="btnCompartilhar" hidden>Compartilhar</button>
     <label class="botao" id="btnTrocar" hidden>
@@ -252,6 +263,11 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="preview" id="preview" hidden role="dialog" aria-label="Prévia em tela cheia">
+  <img id="previewImg" alt="Prévia da arte">
+  <div class="preview-dica">Toque para voltar</div>
+</div>
 
 <script>
 (() => {
@@ -279,14 +295,14 @@
     paisagem: { brasao:0.20, margemInf:0.045 },
     story:    { brasao:0.16, margemInf:0.16  }
   };
-  const LEGENDA_PX = 0.034, LEGENDA_PISO = 0.026, ARROBA_PX = 0.024;
+  const LEGENDA_PX = 0.034, LEGENDA_PISO = 0.026, ARROBA_PX = 0.030;
   const MARGEM = 0.045;
 
   // Layout do CONVITE — grade de 1080 px de largura (spec CVA3 adaptada).
   // `topo`/`base` são zonas de segurança que a interface do Instagram cobre.
   const CONVITE = {
-    feed45: { topo:0,   base:0,   brasaoW:300, brasaoY:150, nomePx:84, dataPx:100 },
-    story:  { topo:220, base:250, brasaoW:440, brasaoY:120, nomePx:100, dataPx:116 }  // brasaoY conta a partir de `topo`
+    feed45: { topo:0,   base:0,   brasaoW:300, brasaoY:160, nomePx:84,  dataPx:100, tituloPx:50 },
+    story:  { topo:220, base:250, brasaoW:440, brasaoY:130, nomePx:100, dataPx:116, tituloPx:58 }  // brasaoY conta a partir de `topo`
   };
   const LOCAIS = {
     pub:  { titulo:"PUB GUARDIAN BIKERS MC", end:"R. Gen. Venâncio Flores, 590 · Duque de Caxias" },
@@ -315,11 +331,12 @@
   const aviso=$("aviso"), formatosEl=$("formatos"), zoomLinha=$("zoomLinha"), zoomEl=$("zoom");
   const btnEscolher=$("btnEscolher"), btnSalvar=$("btnSalvar"), btnCompartilhar=$("btnCompartilhar");
   const btnTrocar=$("btnTrocar"), btnSemFoto=$("btnSemFoto"), toast=$("toast");
+  const btnPreview=$("btnPreview"), preview=$("preview"), previewImg=$("previewImg");
   const ctx = tela.getContext("2d");
 
   const campos = {
     legenda:$("legenda"),
-    cNome:$("cNome"), cData:$("cData"), cDia:$("cDia"), cHora:$("cHora"),
+    cTitulo:$("cTitulo"), cNome:$("cNome"), cData:$("cData"), cDia:$("cDia"), cHora:$("cHora"),
     cLocal:$("cLocal"), cLocalOutro:$("cLocalOutro"),
     cEntrada:$("cEntrada"), cOferta:$("cOferta"), cBanda:$("cBanda"),
     mostrarArroba:$("mostrarArroba")
@@ -542,17 +559,26 @@
 
     // cabeçalho
     losango(c, 101, top + 96, 9, "#D7B56D");
-    c.font = barlow(28, 700); c.fillStyle = "#D7B56D";
-    textoEspacado(c, local.titulo, 124, top + 106, 7, "left");
-    c.font = barlow(24, 600); c.fillStyle = "#B8B0A2"; c.textAlign = "right";
+    c.font = barlow(34, 700); c.fillStyle = "#D7B56D";
+    textoEspacado(c, local.titulo, 124, top + 106, 6, "left");
+    c.font = barlow(30, 600); c.fillStyle = "#B8B0A2"; c.textAlign = "right";
     c.fillText("CONVITE", W - 96, top + 106);
 
-    // brasão centralizado
-    let yl = top + L.brasaoY;
+    // título opcional no topo; quando existe, o brasão desce e encolhe para a data não invadir o bloco
+    let brasaoTop = top + L.brasaoY, brasaoW = L.brasaoW;
+    const titulo = v("cTitulo");
+    if (titulo){
+      c.textAlign = "center";
+      const px = caberLinha(c, titulo.toUpperCase(), anton, L.tituloPx, L.tituloPx*0.65, W - 192);
+      c.font = anton(px); c.fillStyle = "#F1DFC7";
+      c.fillText(titulo.toUpperCase(), W/2, top + 106 + L.tituloPx*1.55);
+      brasaoTop += L.tituloPx*1.7; brasaoW *= 0.8;
+    }
+    let yl = brasaoTop;
     if (brasao){
-      const bw = L.brasaoW, bh = bw*(brasao.naturalHeight/brasao.naturalWidth);
-      c.drawImage(brasao, (W - bw)/2, top + L.brasaoY, bw, bh);
-      yl = top + L.brasaoY + bh;
+      const bh = brasaoW*(brasao.naturalHeight/brasao.naturalWidth);
+      c.drawImage(brasao, (W - brasaoW)/2, brasaoTop, brasaoW, bh);
+      yl = brasaoTop + bh;
     }
 
     // nome do evento
@@ -586,12 +612,12 @@
     colunas.forEach(([rotulo, valor, cheio], i) => {
       let x = 96 + i*colW;
       if (i > 0){ c.fillStyle = "rgba(215,181,109,0.25)"; c.fillRect(x, yR + 18, 1, 90); x += 28; }
-      c.font = barlow(22, 400); c.fillStyle = "#B8B0A2"; c.fillText(rotulo, x, yR + 52);
+      c.font = barlow(30, 500); c.fillStyle = "#B8B0A2"; c.fillText(rotulo, x, yR + 54);
       if (valor){
         const larg = colW - (i > 0 ? 28 : 0) - 16;
-        const px = caberLinha(c, valor.toUpperCase(), p => barlow(p, 700), 40, 24, larg);
+        const px = caberLinha(c, valor.toUpperCase(), p => barlow(p, 700), 48, 28, larg);
         c.font = barlow(px, 700); c.fillStyle = cor(cheio, "#FFFFFF");
-        c.fillText(valor.toUpperCase(), x, yR + 105);
+        c.fillText(valor.toUpperCase(), x, yR + 108);
       }
     });
 
@@ -599,12 +625,12 @@
     const yD = yR + 210, meio = (W - 192)/2 - 20;
     const oferta = texto(v("cOferta"), "[Destaque]"), banda = texto(v("cBanda"), "[Atração]");
     if (oferta){
-      const px = caberLinha(c, oferta.toUpperCase(), anton, 48, 30, meio);
+      const px = caberLinha(c, oferta.toUpperCase(), anton, 54, 32, meio);
       c.font = anton(px); c.fillStyle = cor(v("cOferta"), "#F1DFC7"); c.textAlign = "left";
       c.fillText(oferta.toUpperCase(), 96, yD);
     }
     if (banda){
-      const px = caberLinha(c, banda.toUpperCase(), anton, 48, 30, meio);
+      const px = caberLinha(c, banda.toUpperCase(), anton, 54, 32, meio);
       c.font = anton(px); c.fillStyle = cor(v("cBanda"), "#D7B56D"); c.textAlign = "right";
       c.fillText(banda.toUpperCase(), W - 96, yD);
     }
@@ -615,14 +641,28 @@
     c.fillStyle = "#7B2226"; c.fillRect(0, fim - 120, W, H - (fim - 120));
     const endereco = campos.cLocal.value === "outro" ? texto(v("cLocalOutro"), "[Endereço]") : local.end;
     const arroba = "@GUARDIANBIKERSMC_RJ";
-    c.font = barlow(27, 700);
-    const reserva = c.measureText(arroba).width + 40;      // medido, não chutado
-    c.textAlign = "right"; c.fillStyle = "#F1DFC7";
-    c.fillText(arroba, W - 96, fim - 50);
-    c.textAlign = "left";
-    c.fillStyle = (campos.cLocal.value === "outro" && !v("cLocalOutro")) ? PH : "#F1DFC7";
-    const pxEnd = caberLinha(c, endereco, p => barlow(p, 500), 27, 20, W - 192 - reserva);
-    c.font = barlow(pxEnd, 500); c.fillText(endereco, 96, fim - 50);
+    const corEnd = (campos.cLocal.value === "outro" && !v("cLocalOutro")) ? PH : "#F1DFC7";
+    c.font = barlow(34, 700);
+    const largArroba = c.measureText(arroba).width;
+    const disponivel = W - 192 - largArroba - 40;
+    c.font = barlow(24, 500);
+    const cabeLado = c.measureText(endereco).width <= disponivel;   // no menor corpo aceitável
+    if (cabeLado){
+      // mesma linha: endereço à esquerda, @ à direita
+      c.textAlign = "right"; c.font = barlow(34, 700); c.fillStyle = "#F1DFC7";
+      c.fillText(arroba, W - 96, fim - 46);
+      const pxEnd = caberLinha(c, endereco, p => barlow(p, 500), 34, 24, disponivel);
+      c.textAlign = "left"; c.font = barlow(pxEnd, 500); c.fillStyle = corEnd;
+      c.fillText(endereco, 96, fim - 46);
+    } else {
+      // duas linhas: endereço em cima, @ embaixo
+      const pxEnd = caberLinha(c, endereco, p => barlow(p, 500), 30, 22, W - 192);
+      c.textAlign = "left"; c.font = barlow(pxEnd, 500); c.fillStyle = corEnd;
+      c.fillText(endereco, 96, fim - 72);
+      c.textAlign = "right"; c.font = barlow(30, 700); c.fillStyle = "#F1DFC7";
+      c.fillText(arroba, W - 96, fim - 30);
+      c.textAlign = "left";
+    }
   }
 
   // =================================================================
@@ -788,6 +828,7 @@
     btnSemFoto.hidden = !(convite && temFoto);
     const podeSair = convite || temFoto;
     btnSalvar.hidden = !podeSair;
+    btnPreview.hidden = !podeSair;
     btnCompartilhar.hidden = !podeSair || !podeCompartilhar();
     zoomLinha.hidden = !podeEnquadrar();
   }
@@ -840,7 +881,7 @@
   campos.legenda.addEventListener("input", () => {
     $("contador").textContent = `${campos.legenda.value.length}/48`; agendar();
   });
-  for (const id of ["cNome","cData","cDia","cHora","cLocalOutro","cEntrada","cOferta","cBanda"]){
+  for (const id of ["cTitulo","cNome","cData","cDia","cHora","cLocalOutro","cEntrada","cOferta","cBanda"]){
     campos[id].addEventListener("input", agendar);
   }
   campos.cLocal.addEventListener("change", () => {
@@ -851,6 +892,25 @@
     const d = campos.cData.value.replace(/\D/g, "").slice(0, 4);
     campos.cData.value = d.length > 2 ? d.slice(0,2) + "." + d.slice(2) : d;
   });
+
+  // =================================================================
+  // PRÉVIA EM TELA CHEIA
+  // =================================================================
+  function abrirPreview(){
+    const { w:W, h:H } = dimensoesArte();
+    const off = document.createElement("canvas"); off.width = W; off.height = H;
+    desenhar(off.getContext("2d"), W, H, 1, false);       // sem marcadores: é como vai sair
+    previewImg.src = off.toDataURL("image/jpeg", 0.9);
+    preview.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function fecharPreview(){
+    preview.hidden = true; previewImg.src = "";
+    document.body.style.overflow = "";
+  }
+  btnPreview.addEventListener("click", abrirPreview);
+  preview.addEventListener("click", fecharPreview);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !preview.hidden) fecharPreview(); });
 
   // =================================================================
   // SALVAR E COMPARTILHAR

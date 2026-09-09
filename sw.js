@@ -1,6 +1,6 @@
 // v2 — página sempre busca a versão nova quando há sinal; sem sinal, usa o cache.
-const CACHE = "gbmc-v2";
-const ARQUIVOS = ["./","./index.html","./brasao.png","./manifest.webmanifest","./icone-192.png","./icone-512.png","./apple-touch-icon.png"];
+const CACHE = "gbmc-v3";
+const ARQUIVOS = ["./","./index.html","./brasao.png","./manifest.webmanifest","./icone-192.png","./icone-512.png","./apple-touch-icon.png","./favicon.ico","./favicon-32.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
